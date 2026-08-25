@@ -6,7 +6,7 @@ services:
   # -------------------------------------------------------------
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: exam-portal-postgres
+    container_name: learning-purpose-postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
@@ -16,19 +16,19 @@ services:
       - pgdata:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
     networks:
-      - exam-network
+      - learning-purpose-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
 
-# -------------------------------------------------------------
+  # -------------------------------------------------------------
   # Message Broker: Apache Kafka (KRaft Mode - No Zookeeper)
   # -------------------------------------------------------------
   kafka:
     image: confluentinc/cp-kafka:7.5.0
-    container_name: exam-portal-kafka
+    container_name: learning-purpose-kafka
     ports:
       - "9092:9092"
     environment:
@@ -49,14 +49,14 @@ services:
     volumes:
       - kafkadata:/var/lib/kafka/data
     networks:
-      - exam-network
+      - learning-purpose-network
 
-# -------------------------------------------------------------
+  # -------------------------------------------------------------
   # Object Storage: MinIO (S3 Compatible API)
   # -------------------------------------------------------------
   minio:
     image: minio/minio:latest
-    container_name: exam-portal-minio
+    container_name: learning-purpose-minio
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
@@ -67,22 +67,22 @@ services:
     volumes:
       - miniodata:/data
     networks:
-      - exam-network
+      - learning-purpose-network
 
-# -------------------------------------------------------------
+  # -------------------------------------------------------------
   # Local SMTP Server: Mailpit (Email Mock & Web UI)
   # -------------------------------------------------------------
   mailpit:
     image: axllent/mailpit:latest
-    container_name: exam-portal-mailpit
+    container_name: learning-purpose-mailpit
     ports:
       - "1025:1025" # SMTP port
       - "8025:8025" # Web UI
     networks:
-      - exam-network
+      - learning-purpose-network
 
 networks:
-  exam-network:
+  learning-purpose-network:
     driver: bridge
 
 volumes:

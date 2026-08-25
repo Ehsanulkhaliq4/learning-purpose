@@ -4,15 +4,17 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.exam.microservices</groupId>
-    <artifactId>exam-portal-parent</artifactId>
+    <groupId>com.learningpurpose</groupId>
+    <artifactId>learningpurpose-parent</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>exam-portal-parent</name>
-    <description>Root POM for Distributed Exam Portal Microservices</description>
+    <name>learningpurpose-parent</name>
+    <description>Parent POM for Distributed Learning Purpose Platform (JDK 21)</description>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <spring-boot.version>3.2.3</spring-boot.version>
         <spring-cloud.version>2023.0.0</spring-cloud.version>
         <spring-ai.version>0.8.1</spring-ai.version>
@@ -23,7 +25,7 @@
 
     <modules>
         <module>services/api-gateway</module>
-        <module>services/user-service</module>
+        <module>services/userservice</module>
         <module>services/exam-service</module>
         <module>services/bookstore-service</module>
         <module>services/blog-service</module>
@@ -94,10 +96,10 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.11.0</version>
+                    <version>3.13.0</version>
                     <configuration>
-                        <source>${java.version}</source>
-                        <target>${java.version}</target>
+                        <source>21</source>
+                        <target>21</target>
                         <annotationProcessorPaths>
                             <path>
                                 <groupId>org.projectlombok</groupId>
