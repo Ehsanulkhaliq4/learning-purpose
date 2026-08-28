@@ -1,7 +1,7 @@
-package com.learningpurpose.notification_service.consumer;
+package com.learningpurpose.notificationservice.consumer;
 
-import com.learningpurpose.notification_service.event.ExamSubmittedEvent;
-import com.learningpurpose.notification_service.service.EmailService;
+import com.learningpurpose.notificationservice.event.ExamSubmittedEvent;
+import com.learningpurpose.notificationservice.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;

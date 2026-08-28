@@ -1,6 +1,6 @@
-package com.learningpurpose.notification_service.service.impl;
+package com.learningpurpose.notificationservice.service.impl;
 
-import com.learningpurpose.notification_service.service.EmailService;
+import com.learningpurpose.notificationservice.service.EmailService;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;

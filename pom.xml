@@ -1,115 +1,241 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                          https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <groupId>com.learningpurpose</groupId>
-    <artifactId>learningpurpose-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
-    <name>learningpurpose-parent</name>
-    <description>Parent POM for Distributed Learning Purpose Platform (JDK 21)</description>
+```
+<modelVersion>4.0.0</modelVersion>
 
-    <properties>
-        <java.version>21</java.version>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
-        <spring-boot.version>3.2.3</spring-boot.version>
-        <spring-cloud.version>2023.0.0</spring-cloud.version>
-        <spring-ai.version>0.8.1</spring-ai.version>
-        <jjwt.version>0.12.5</jjwt.version>
-        <flyway.version>10.8.1</flyway.version>
-        <lombok.version>1.18.30</lombok.version>
-    </properties>
+<!-- =========================================================
+     Project Information
+     ========================================================= -->
+<groupId>com.learningpurpose</groupId>
+<artifactId>learningpurpose-parent</artifactId>
+<version>1.0.0-SNAPSHOT</version>
+<packaging>pom</packaging>
 
-    <modules>
-        <module>services/api-gateway</module>
-        <module>services/userservice</module>
-        <module>services/exam-service</module>
-        <module>services/bookstore-service</module>
-        <module>services/blog-service</module>
-        <module>services/notification-service</module>
-        <module>services/ai-chat-service</module>
-        <module>services/media-streaming-service</module>
-    </modules>
+<name>learningpurpose-parent</name>
+<description>Parent POM for Distributed Learning Purpose Platform</description>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
+
+<!-- =========================================================
+     Properties
+     ========================================================= -->
+<properties>
+
+    <!-- Java -->
+    <java.version>21</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+
+    <!-- Spring -->
+    <spring-boot.version>4.1.1</spring-boot.version>
+
+    <!-- Spring Cloud -->
+    <spring-cloud.version>2025.1.0</spring-cloud.version>
+
+    <!-- Spring AI -->
+    <spring-ai.version>2.0.0</spring-ai.version>
+
+    <!-- Other Libraries -->
+    <jjwt.version>0.12.5</jjwt.version>
+    <flyway.version>10.8.1</flyway.version>
+    <lombok.version>1.18.38</lombok.version>
+
+    <!-- Encoding -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+</properties>
+
+
+<!-- =========================================================
+     Modules
+     ========================================================= -->
+<modules>
+
+    <module>services/api-gateway</module>
+    <module>services/userservice</module>
+    <module>services/exam-service</module>
+    <module>services/bookstore-service</module>
+    <module>services/blog-service</module>
+    <module>services/notification-service</module>
+    <module>services/ai-chat-service</module>
+    <module>services/media-streaming-service</module>
+
+</modules>
+
+
+<!-- =========================================================
+     Dependency Management
+     ========================================================= -->
+<dependencyManagement>
+
+    <dependencies>
+
+        <!-- =================================================
+             Spring Boot BOM
+             ================================================= -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-dependencies</artifactId>
+            <version>${spring-boot.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+
+
+        <!-- =================================================
+             Spring Cloud BOM
+             ================================================= -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>${spring-cloud.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+
+
+        <!-- =================================================
+             Spring AI BOM
+             Spring AI 2.0.x supports Spring Boot 4.0.x
+             and 4.1.x
+             ================================================= -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-bom</artifactId>
+            <version>${spring-ai.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+
+
+        <!-- =================================================
+             JJWT
+             ================================================= -->
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>${jjwt.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId>
+            <version>${jjwt.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- =================================================
+             Flyway
+             ================================================= -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>${flyway.version}</version>
+        </dependency>
+
+
+        <!-- =================================================
+             Lombok
+             ================================================= -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+        </dependency>
+
+    </dependencies>
+
+</dependencyManagement>
+
+
+<!-- =========================================================
+     Build Configuration
+     ========================================================= -->
+<build>
+
+    <pluginManagement>
+
+        <plugins>
+
+            <!-- =================================================
+                 Spring Boot Maven Plugin
+                 ================================================= -->
+            <plugin>
                 <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.cloud</groupId>
-                <artifactId>spring-cloud-dependencies</artifactId>
-                <version>${spring-cloud.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework.ai</groupId>
-                <artifactId>spring-ai-bom</artifactId>
-                <version>${spring-ai.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-api</artifactId>
-                <version>${jjwt.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-impl</artifactId>
-                <version>${jjwt.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.jsonwebtoken</groupId>
-                <artifactId>jjwt-jackson</artifactId>
-                <version>${jjwt.version}</version>
-                <scope>runtime</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot.version}</version>
-                    <configuration>
-                        <excludes>
-                            <exclude>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                            </exclude>
-                        </excludes>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.13.0</version>
-                    <configuration>
-                        <source>21</source>
-                        <target>21</target>
-                        <annotationProcessorPaths>
-                            <path>
-                                <groupId>org.projectlombok</groupId>
-                                <artifactId>lombok</artifactId>
-                                <version>${lombok.version}</version>
-                            </path>
-                        </annotationProcessorPaths>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+
+            <!-- =================================================
+                 Maven Compiler Plugin
+                 ================================================= -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+
+                <configuration>
+
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+
+                    <parameters>true</parameters>
+
+                    <annotationProcessorPaths>
+
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+
+                    </annotationProcessorPaths>
+
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+    </pluginManagement>
+
+</build>
+
+
+<!-- =========================================================
+     Maven Central
+     ========================================================= -->
+<repositories>
+
+    <repository>
+        <id>central</id>
+        <name>Maven Central</name>
+        <url>https://repo.maven.apache.org/maven2</url>
+    </repository>
+
+</repositories>
+```
+
 </project>

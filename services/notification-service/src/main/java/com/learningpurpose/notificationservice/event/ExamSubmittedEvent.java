@@ -1,4 +1,4 @@
-package com.learningpurpose.notification_service.event;
+package com.learningpurpose.notificationservice.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

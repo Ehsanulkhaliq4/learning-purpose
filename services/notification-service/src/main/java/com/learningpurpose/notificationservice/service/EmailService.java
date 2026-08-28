@@ -1,4 +1,4 @@
-package com.learningpurpose.notification_service.service;
+package com.learningpurpose.notificationservice.service;
 
 public interface EmailService {
     void sendWelcomeEmail(String toEmail, String name);
