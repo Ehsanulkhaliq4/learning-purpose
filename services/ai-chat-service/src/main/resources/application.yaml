@@ -1,0 +1,22 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: ai-chat-service
+  ai:
+    vertex:
+      ai:
+        gemini:
+          project-id: ${GCP_PROJECT_ID:learning-purpose-prod}
+          location: ${GCP_LOCATION:us-central1}
+          chat:
+            options:
+              model: gemini-2.5-flash
+              temperature: 0.4
+              top-p: 0.95
+              top-k: 40
+
+app:
+  services:
+    exam-service-url: ${EXAM_SERVICE_URL:http://localhost:8082}
