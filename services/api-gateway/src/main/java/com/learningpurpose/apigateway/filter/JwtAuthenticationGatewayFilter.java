@@ -34,25 +34,22 @@ public class JwtAuthenticationGatewayFilter implements GatewayFilter {
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
 
-        // Bypass security for public endpoints
+        // 1. Bypass security for public endpoints
         if (OPEN_API_ENDPOINTS.stream().anyMatch(path::startsWith)) {
             return chain.filter(exchange);
         }
 
-        if (!request.getHeaders().containsHeader(HttpHeaders.AUTHORIZATION)) {
-            log.warn("Missing Authorization Header for route: {}", path);
-            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            return exchange.getResponse().setComplete();
-        }
-
+        // 2. Extract Authorization Header
         String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            log.warn("Missing or invalid Authorization header for route: {}", path);
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
         String token = authHeader.substring(7);
 
+        // 3. Validate Token and Inject Identity Headers Downstream
         try {
             if (!jwtUtil.validateToken(token)) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
@@ -63,7 +60,6 @@ public class JwtAuthenticationGatewayFilter implements GatewayFilter {
             String username = claims.getSubject();
             Object role = claims.get("role");
 
-            // Mutate request with user identity headers for downstream microservices
             ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                     .header("X-Authenticated-User", username)
                     .header("X-Authenticated-Role", role != null ? role.toString() : "ROLE_USER")
