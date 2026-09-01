@@ -1,0 +1,25 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      httpclient:
+        connect-timeout: 3000
+        response-timeout: 30s
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
+
+jwt:
+  secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+
+# Target Microservice Downstream URLs
+services:
+  user-service: http://localhost:8081
+  exam-service: http://localhost:8082
+  bookstore-service: http://localhost:8083
+  blog-service: http://localhost:8084
+  ai-chat-service: http://localhost:8086
+  media-streaming-service: http://localhost:8087
