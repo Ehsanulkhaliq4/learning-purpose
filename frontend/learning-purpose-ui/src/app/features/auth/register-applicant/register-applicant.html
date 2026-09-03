@@ -1,0 +1,115 @@
+<div class="auth-page-container">
+  <div class="auth-card card">
+    <div class="auth-header">
+      <div class="brand-monogram">
+        <div class="spark-icon"></div>
+      </div>
+      <h2>Register Applicant</h2>
+      <p>Create your candidate profile to access courses and assessments</p>
+    </div>
+
+    @if (errorMessage()) {
+      <div class="alert-banner danger">
+        {{ errorMessage() }}
+      </div>
+    }
+
+    @if (successMessage()) {
+      <div class="alert-banner success">
+        {{ successMessage() }}
+      </div>
+    }
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate class="auth-form">
+      <div class="form-row-duo">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input
+            id="firstName"
+            type="text"
+            formControlName="firstName"
+            placeholder="John"
+            class="form-control"
+            [class.input-error]="isFieldInvalid('firstName')"
+          />
+        @if (isFieldInvalid('firstName')) {
+            <span class="field-error">First name is required</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input
+            id="lastName"
+            type="text"
+            formControlName="lastName"
+            placeholder="Doe"
+            class="form-control"
+            [class.input-error]="isFieldInvalid('lastName')"
+          />
+        @if (isFieldInvalid('lastName')) {
+            <span class="field-error">Last name is required</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input
+          id="username"
+          type="text"
+          formControlName="username"
+          placeholder="candidate_jdoe"
+          class="form-control"
+          [class.input-error]="isFieldInvalid('username')"
+        />
+        @if (isFieldInvalid('username')) {
+          <span class="field-error">Valid username required (min 3 chars)</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="candidate@domain.com"
+          class="form-control"
+          [class.input-error]="isFieldInvalid('email')"
+        />
+        @if (isFieldInvalid('email')) {
+          <span class="field-error">Valid email address is required</span>
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          class="form-control"
+          [class.input-error]="isFieldInvalid('password')"
+        />
+        @if (isFieldInvalid('password')) {
+          <span class="field-error">Password must be at least 6 characters</span>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary w-full submit-btn"
+        [disabled]="isSubmitting()"
+      >
+        {{ isSubmitting() ? 'Registering Account...' : 'Complete Registration' }}
+      </button>
+
+      <div class="form-footer">
+        <span>Already have an account?</span>
+        <a routerLink="/auth/login" class="link-action">Sign In</a>
+      </div>
+    </form>
+  </div>
+</div>

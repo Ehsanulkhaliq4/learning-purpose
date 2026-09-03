@@ -1,0 +1,517 @@
+{
+  "info": {
+    "_postman_id": "8f3b6c2d-9876-4d1a-bc01-e23456789abc",
+    "name": "Exam Management Microservices Platform (Spring Boot & Angular)",
+    "description": "Production API endpoints routed through API Gateway (port 8080) for Auth, Exam, Bookstore, Blog, AI Chat (SSE), and Media Streaming.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "gateway_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. User & Auth Service",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alex_doe\",\n  \"password\": \"SecurePass#2026\",\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Doe\",\n  \"email\": \"alex.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"profile\": \"default.png\",\n  \"roles\": [\"ROLE_NORMAL\"]\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/auth/register",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"id\": 101,\n  \"username\": \"alex_doe\",\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Doe\",\n  \"email\": \"alex.doe@example.com\",\n  \"phone\": \"+1234567890\",\n  \"enabled\": true,\n  \"profile\": \"default.png\",\n  \"authorities\": [\"ROLE_NORMAL\"],\n  \"createdAt\": \"2026-09-03T10:00:00Z\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login / Generate JWT",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();",
+                  "if (jsonData.token) {",
+                  "    pm.collectionVariables.set('auth_token', jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"alex_doe\",\n  \"password\": \"SecurePass#2026\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/auth/login",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGV4X2RvZSIsImV4cCI6MTc4ODQyNTYwMH0.d9u3K...\",\n  \"user\": {\n    \"id\": 101,\n    \"username\": \"alex_doe\",\n    \"email\": \"alex.doe@example.com\",\n    \"roles\": [\"ROLE_NORMAL\"]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Current User Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/auth/current-user",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "auth", "current-user"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"id\": 101,\n  \"username\": \"alex_doe\",\n  \"firstName\": \"Alex\",\n  \"lastName\": \"Doe\",\n  \"email\": \"alex.doe@example.com\",\n  \"enabled\": true,\n  \"authorities\": [\n    { \"authority\": \"ROLE_NORMAL\" }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Request OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alex.doe@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/auth/otp/send",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "auth", "otp", "send"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"OTP has been dispatched asynchronously to the registered email address.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alex.doe@example.com\",\n  \"otp\": 654321\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/auth/otp/verify",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "auth", "otp", "verify"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"verified\": true,\n  \"message\": \"OTP verification successful. Proceed with password reset or account activation.\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Exam Engine Service",
+      "item": [
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Cloud Architecture\",\n  \"description\": \"Assessments covering cloud computing, microservices, and distributed systems.\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/exam/category",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "exam", "category"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"cid\": 12,\n  \"title\": \"Cloud Architecture\",\n  \"description\": \"Assessments covering cloud computing, microservices, and distributed systems.\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/exam/category",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "exam", "category"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "[\n  {\n    \"cid\": 12,\n    \"title\": \"Cloud Architecture\",\n    \"description\": \"Assessments covering cloud computing, microservices, and distributed systems.\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Create Quiz",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Microservices Design Patterns\",\n  \"description\": \"Test your knowledge on Saga, CQRS, and Event Sourcing patterns.\",\n  \"maxMarks\": \"100\",\n  \"numberOfQuestions\": \"25\",\n  \"active\": true,\n  \"category\": {\n    \"cid\": 12\n  }\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/exam/quiz",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "exam", "quiz"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"qId\": 45,\n  \"title\": \"Microservices Design Patterns\",\n  \"description\": \"Test your knowledge on Saga, CQRS, and Event Sourcing patterns.\",\n  \"maxMarks\": \"100\",\n  \"numberOfQuestions\": \"25\",\n  \"active\": true,\n  \"category\": {\n    \"cid\": 12,\n    \"title\": \"Cloud Architecture\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add Question to Quiz",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"content\": \"Which pattern handles distributed transactions across microservices?\",\n  \"image\": \"default.png\",\n  \"options\": [\n    \"Two-Phase Commit (Strict Blocking)\",\n    \"Saga Pattern\",\n    \"Singleton Pattern\",\n    \"Factory Pattern\"\n  ],\n  \"answer\": \"Saga Pattern\",\n  \"quiz\": {\n    \"qId\": 45\n  }\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/exam/question",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "exam", "question"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"quesId\": 801,\n  \"content\": \"Which pattern handles distributed transactions across microservices?\",\n  \"image\": \"default.png\",\n  \"options\": [\n    \"Two-Phase Commit (Strict Blocking)\",\n    \"Saga Pattern\",\n    \"Singleton Pattern\",\n    \"Factory Pattern\"\n  ],\n  \"answer\": \"Saga Pattern\",\n  \"quiz\": {\n    \"qId\": 45\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Evaluate Quiz Submission",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"quesId\": 801,\n    \"givenAnswer\": \"Saga Pattern\"\n  }\n]"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/exam/quiz/evaluate",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "exam", "quiz", "evaluate"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"marksGot\": 4.0,\n  \"correctAnswers\": 1,\n  \"attempted\": 1,\n  \"totalQuestions\": 25,\n  \"status\": \"EVALUATED\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Bookstore Service",
+      "item": [
+        {
+          "name": "Get Book Catalog (Paged)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/books?page=0&size=10",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "books"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK",
+              "status": "OK",
+              "code": 200,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"title\": \"Designing Data-Intensive Applications\",\n      \"author\": \"Martin Kleppmann\",\n      \"description\": \"Comprehensive guide on storage engines, distributed consensus, and streaming.\",\n      \"postedDate\": \"2026-01-15T00:00:00Z\",\n      \"contentType\": \"application/pdf\",\n      \"coverImageUrl\": \"https://s3.local/books/ddia_cover.jpg\",\n      \"pdfStorageKey\": \"books/ddia_full.pdf\"\n    }\n  ],\n  \"pageable\": {\n    \"pageNumber\": 0,\n    \"pageSize\": 10\n  },\n  \"totalElements\": 1,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download PDF Stream",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{auth_token}}" }],
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/books/1/download",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "books", "1", "download"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK (Binary Stream)",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "application/pdf" },
+                { "key": "Content-Disposition", "value": "attachment; filename=\"ddia_preview.pdf\"" }
+              ],
+              "body": "%PDF-1.4 ... binary byte payload ..."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Blog & Community Service",
+      "item": [
+        {
+          "name": "Create Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Migrating from MySQL to PostgreSQL with Spring Boot\",\n  \"content\": \"Deep dive into schema migrations, jsonb mappings, and index tuning.\",\n  \"postedBy\": \"alex_doe\",\n  \"tags\": [\"database\", \"postgresql\", \"spring-boot\"]\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/blog/posts",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "blog", "posts"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"id\": 305,\n  \"name\": \"Migrating from MySQL to PostgreSQL with Spring Boot\",\n  \"content\": \"Deep dive into schema migrations, jsonb mappings, and index tuning.\",\n  \"postedBy\": \"alex_doe\",\n  \"date\": \"2026-09-03T10:15:00Z\",\n  \"viewContent\": 0,\n  \"tags\": [\"database\", \"postgresql\", \"spring-boot\"]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add Comment to Post",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"postId\": 305,\n  \"content\": \"Great guide! How do you handle Flyway baseline-on-migrate?\",\n  \"postedBy\": \"sarah_tech\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/blog/comments",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "blog", "comments"]
+            }
+          },
+          "response": [
+            {
+              "name": "201 Created",
+              "status": "Created",
+              "code": 201,
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "body": "{\n  \"id\": 77,\n  \"postId\": 305,\n  \"content\": \"Great guide! How do you handle Flyway baseline-on-migrate?\",\n  \"postedBy\": \"sarah_tech\",\n  \"createdAt\": \"2026-09-03T10:20:00Z\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. AI Chatbot Service (Spring AI)",
+      "item": [
+        {
+          "name": "Stream Chat Response (SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Accept", "value": "text/event-stream" },
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"conversationId\": \"chat-session-882\",\n  \"message\": \"Explain the difference between Saga Choreography and Orchestration for the upcoming exam.\"\n}"
+            },
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/ai/chat/stream",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "ai", "chat", "stream"]
+            }
+          },
+          "response": [
+            {
+              "name": "200 OK (SSE Stream Event Chunks)",
+              "status": "OK",
+              "code": 200,
+              "header": [
+                { "key": "Content-Type", "value": "text/event-stream" },
+                { "key": "Cache-Control", "value": "no-cache" }
+              ],
+              "body": "data:In Saga Choreography,\n\ndata: services react to domain events\n\ndata: without a centralized coordinator.\n\ndata: Orchestration uses a central coordinator.\n\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Media Streaming Service (Byte-Range)",
+      "item": [
+        {
+          "name": "Stream Video Content (Byte-Range HTTP 206)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Range",
+                "value": "bytes=0-1048575"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{gateway_url}}/api/v1/media/stream/lecture-101.mp4",
+              "host": ["{{gateway_url}}"],
+              "path": ["api", "v1", "media", "stream", "lecture-101.mp4"]
+            }
+          },
+          "response": [
+            {
+              "name": "206 Partial Content",
+              "status": "Partial Content",
+              "code": 206,
+              "header": [
+                { "key": "Content-Type", "value": "video/mp4" },
+                { "key": "Accept-Ranges", "value": "bytes" },
+                { "key": "Content-Range", "value": "bytes 0-1048575/52428800" },
+                { "key": "Content-Length", "value": "1048576" }
+              ],
+              "body": "<Binary Video Chunk: 1MB payload>"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

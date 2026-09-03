@@ -57,7 +57,7 @@
 <modules>
 
     <module>services/api-gateway</module>
-    <module>services/userservice</module>
+    <module>services/user-service</module>
     <module>services/exam-service</module>
     <module>services/bookstore-service</module>
     <module>services/blog-service</module>
