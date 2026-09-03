@@ -1,7 +1,7 @@
 .intro-section {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 5.5rem 1.5rem 4rem;
+  padding: 7rem 1.5rem 4rem;
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(420px, 1.1fr);
   align-items: center;
@@ -200,7 +200,7 @@
 @media (max-width: 560px) {
   .intro-section {
     display: block;
-    padding-top: 3rem;
+    padding-top: 4rem;
   }
 
   .intro-actions { flex-wrap: wrap; }

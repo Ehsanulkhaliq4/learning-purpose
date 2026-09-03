@@ -1,5 +1,6 @@
 package com.learningpurpose.userservice.controller;
 
+import com.learningpurpose.userservice.dto.AuthRequest;
 import com.learningpurpose.userservice.dto.AuthResponse;
 import com.learningpurpose.userservice.dto.OtpVerificationRequest;
 import com.learningpurpose.userservice.dto.RegisterRequest;
@@ -24,9 +25,15 @@ public class AuthController {
         return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
     }
 
-    @PostMapping("/forgot-password")
-    public ResponseEntity<Map<String, String>> forgotPassword(@RequestParam String email) {
-        authService.requestPasswordResetOtp(email);
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request) {
+        return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping(value = "/forgot-password", params = "email")
+    public ResponseEntity<Map<String, String>> forgotPasswordParam(@RequestParam("email") String email) {
+        String cleanEmail = email.replace("\"", "").trim();
+        authService.requestPasswordResetOtp(cleanEmail);
         return ResponseEntity.ok(Map.of("message", "OTP dispatched successfully"));
     }
 

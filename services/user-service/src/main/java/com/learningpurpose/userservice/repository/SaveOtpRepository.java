@@ -12,4 +12,5 @@ public interface SaveOtpRepository extends JpaRepository<SaveOtp, Long> {
     Optional<SaveOtp> findTopByEmailAndOtpAndUsedFalseAndExpiresAtAfterOrderByCreatedAtDesc(
             String email, String otp, Instant now
     );
+    void deleteByEmailAndUsedFalse(String email);
 }

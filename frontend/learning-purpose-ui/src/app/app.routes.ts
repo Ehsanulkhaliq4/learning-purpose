@@ -39,6 +39,21 @@ export const routes: Routes = [
             (m) => m.QuizTake
           )
       },
+      {
+        path: 'blog',
+        loadComponent: () =>
+          import('./features/blog/post-feed/post-feed').then((m) => m.PostFeed)
+      },
+      {
+        path: 'blog/new',
+        loadComponent: () =>
+          import('./features/blog/post-create/post-create').then((m) => m.PostCreate)
+      },
+      {
+        path: 'blog/:id',
+        loadComponent: () =>
+          import('./features/blog/post-detail/post-detail').then((m) => m.PostDetail)
+      },
     ]
   },
   {
@@ -55,6 +70,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/auth/register-applicant/register-applicant').then(
             (m) => m.RegisterApplicant
+          )
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./features/auth/reset-password/reset-password').then(
+            (m) => m.ResetPassword
           )
       },
       { path: '', redirectTo: 'login', pathMatch: 'full' }

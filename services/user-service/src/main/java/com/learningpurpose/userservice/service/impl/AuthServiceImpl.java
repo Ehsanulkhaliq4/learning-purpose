@@ -1,5 +1,6 @@
 package com.learningpurpose.userservice.service.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.learningpurpose.userservice.config.JwtService;
 import com.learningpurpose.userservice.dto.AuthRequest;
 import com.learningpurpose.userservice.dto.AuthResponse;
@@ -17,6 +18,7 @@ import com.learningpurpose.userservice.repository.SaveOtpRepository;
 import com.learningpurpose.userservice.repository.UserRepository;
 import com.learningpurpose.userservice.service.AuthService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +36,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
@@ -42,8 +45,10 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final KafkaTemplate<String , Object> kafkaTemplate;
+    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String , String> kafkaTemplate;
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final String TOPIC_USER_REGISTERED = "user-registered-topic";
     private static final String TOPIC_OTP_REQUESTED = "otp-requested-topic";
 
@@ -78,7 +83,13 @@ public class AuthServiceImpl implements AuthService {
                 .lastName(savedUser.getLastName())
                 .registeredAt(Instant.now())
                 .build();
-        kafkaTemplate.send(TOPIC_USER_REGISTERED,savedUser.getEmail(),event);
+        try {
+            String payload = objectMapper.writeValueAsString(event);
+            kafkaTemplate.send(TOPIC_USER_REGISTERED,savedUser.getEmail(),payload);
+        } catch (Exception ex) {
+            log.error("Failed to serialize and dispatch OTP event", ex);
+        }
+
         String jwtToken = jwtService.generateToken(savedUser);
         return AuthResponse.builder()
                 .token(jwtToken)
@@ -106,10 +117,18 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void requestPasswordResetOtp(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
-        String otp = String.format("%060",new SecureRandom().nextInt(999999));
+        String normalizedEmail = email.replace("\"", "").trim().toLowerCase();
+
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + normalizedEmail));
+
+        // Generate a 6-digit numeric OTP (%06d instead of %060)
+        String otp = String.format("%06d", SECURE_RANDOM.nextInt(1_000_000));
         Instant expiresAt = Instant.now().plus(Duration.ofMinutes(10));
+
+        // Invalidate any active, unused OTPs for this email before issuing a new one
+        saveOtpRepository.deleteByEmailAndUsedFalse(user.getEmail());
+
         SaveOtp saveOtp = SaveOtp.builder()
                 .email(user.getEmail())
                 .otp(otp)
@@ -117,12 +136,26 @@ public class AuthServiceImpl implements AuthService {
                 .used(false)
                 .build();
         saveOtpRepository.save(saveOtp);
+
         OtpRequestedEvent otpEvent = OtpRequestedEvent.builder()
                 .email(user.getEmail())
                 .otp(otp)
                 .expiresAt(expiresAt)
                 .build();
-        kafkaTemplate.send(TOPIC_OTP_REQUESTED,user.getEmail(),otpEvent);
+        try {
+            String payload = objectMapper.writeValueAsString(otpEvent);
+            kafkaTemplate.send(TOPIC_OTP_REQUESTED, user.getEmail(), payload)
+                    .whenComplete((result, ex) -> {
+                        if (ex == null) {
+                            log.info("Dispatched OTP event for [{}] to partition [{}]",
+                                    user.getEmail(), result.getRecordMetadata().partition());
+                        } else {
+                            log.error("Failed to publish OTP event for [{}]", user.getEmail(), ex);
+                        }
+                    });
+        }catch (Exception ex) {
+            log.error("Failed to serialize and dispatch OTP event", ex);
+        }
     }
 
     @Override

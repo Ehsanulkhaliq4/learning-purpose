@@ -76,7 +76,7 @@
 }
 
 .public-content {
-  padding: 0 1rem 4rem;
+  padding: 0.5rem 1rem 2rem;
 }
 
 @media (max-width: 560px) {
@@ -90,6 +90,10 @@
 
   .public-nav {
     gap: 0.75rem;
+  }
+
+  .public-content {
+    padding-top: 0.5rem;
   }
 
 }
