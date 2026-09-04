@@ -65,6 +65,9 @@ public class GatewayRoutesConfig {
                         .filters(f -> f.filter(jwtFilter))
                         .uri(mediaServiceUrl))
 
+                // 7. Public Posts
+                .route("blog-service", r -> r.path(""))
+
                 .build();
     }
 }

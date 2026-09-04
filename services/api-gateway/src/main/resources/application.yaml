@@ -23,3 +23,8 @@ services:
   blog-service: http://localhost:8084
   ai-chat-service: http://localhost:8086
   media-streaming-service: http://localhost:8087
+
+logging:
+  level:
+    com.learningpurpose.apigateway: DEBUG
+    io.jsonwebtoken: DEBUG
