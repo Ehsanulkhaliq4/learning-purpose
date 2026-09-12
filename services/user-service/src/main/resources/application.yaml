@@ -30,6 +30,16 @@ spring:
       properties:
         spring.json.add.type.headers: false
 
+app:
+  security:
+    admin:
+      username: ${ADMIN_USERNAME:ehsanmalik}
+      password: ${ADMIN_PASSWORD:121291}
+      email: ${ADMIN_EMAIL:ehsanmalik@gmail.com}
+      first-name: System
+      last-name: Administrator
+      phone: "+92166450330"
+
 jwt:
   secret: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
   expiration-ms: 86400000
