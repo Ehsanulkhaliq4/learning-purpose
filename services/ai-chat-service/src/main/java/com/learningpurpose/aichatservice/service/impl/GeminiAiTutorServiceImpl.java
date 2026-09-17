@@ -14,6 +14,12 @@ public class GeminiAiTutorServiceImpl implements AiTutorService {
 
     private final ChatClient chatClient;
 
+    private static final String SYSTEM_TEMPLATE = """
+        You are an expert academic tutor for the subject: {context}.
+        Provide clear, concise, and accurate explanations.
+        Use short examples where useful.
+        """;
+
     @Override
     public Flux<String> streamTutorResponse(String prompt, String subjectContext) {
         String effectiveContext = (subjectContext != null && !subjectContext.isBlank())
@@ -23,7 +29,7 @@ public class GeminiAiTutorServiceImpl implements AiTutorService {
         log.info("Initiating Gemini token stream for prompt context: [{}]", effectiveContext);
 
         return chatClient.prompt()
-                .system(sp -> sp.param("context", effectiveContext))
+                .system(s -> s.text(SYSTEM_TEMPLATE).param("context", effectiveContext))
                 .user(prompt)
                 .stream()
                 .content()

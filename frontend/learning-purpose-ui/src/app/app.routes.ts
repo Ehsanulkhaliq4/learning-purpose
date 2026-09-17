@@ -77,6 +77,30 @@ export const routes: Routes = [
           )
       },
       {
+        path: 'admin/quiz/categories',
+        data: { section: 'categories' },
+        loadComponent: () =>
+          import('./features/quizzes/admin-quiz-manager/admin-quiz-manager').then(
+            (m) => m.AdminQuizManager
+          )
+      },
+      {
+        path: 'admin/quiz/quizzes',
+        data: { section: 'quizzes' },
+        loadComponent: () =>
+          import('./features/quizzes/admin-quiz-manager/admin-quiz-manager').then(
+            (m) => m.AdminQuizManager
+          )
+      },
+      {
+        path: 'admin/quiz/questions',
+        data: { section: 'questions' },
+        loadComponent: () =>
+          import('./features/quizzes/admin-quiz-manager/admin-quiz-manager').then(
+            (m) => m.AdminQuizManager
+          )
+      },
+      {
         path: 'quizzes/:id',
         loadComponent: () =>
           import('./features/quizzes/quiz-take/quiz-take').then(
@@ -87,6 +111,11 @@ export const routes: Routes = [
         path: 'books',
         loadComponent: () =>
           import('./features/books/book-catalog/book-catalog').then((m) => m.BookCatalog)
+      },
+      {
+        path: 'books/new',
+        loadComponent: () =>
+          import('./features/books/book-create/book-create').then((m) => m.BookCreate)
       },
       {
         path: 'media',

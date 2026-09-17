@@ -1,5 +1,6 @@
 package com.learningpurpose.aichatservice.config;
 
+import com.learningpurpose.aichatservice.tool.ExamCatalogTools;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,10 +20,10 @@ public class GeminiChatConfig {
         """;
 
     @Bean
-    public ChatClient chatClient(ChatClient.Builder builder) {
+    public ChatClient chatClient(ChatClient.Builder builder, ExamCatalogTools examCatalogTools) {
         return builder
                 .defaultSystem(SYSTEM_PROMPT)
-                .defaultFunctions("getAvailableQuizzes")
+                .defaultTools(examCatalogTools)
                 .build();
     }
 }
