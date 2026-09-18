@@ -5,7 +5,6 @@ import com.learningpurpose.mediastreamingservice.service.MediaStreamingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.*;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,7 +25,6 @@ public class MediaStreamingController {
     }
 
     @PostMapping(value = "/videos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Video> uploadVideo(
             @RequestParam("title") String title,
             @RequestParam("description") String description,
@@ -38,7 +36,6 @@ public class MediaStreamingController {
     }
 
     @DeleteMapping("/videos/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteVideo(@PathVariable Long id) {
         mediaService.deleteVideo(id);
         return ResponseEntity.noContent().build();

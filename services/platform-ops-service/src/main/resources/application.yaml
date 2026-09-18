@@ -12,11 +12,33 @@ spring:
   kafka:
     bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
   mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
+    host: ${MAIL_HOST:localhost}       # Mailpit runs on your host's port 1025
     port: ${MAIL_PORT:1025}
+    username: ""                       # Mailpit needs no auth
+    password: ""
     properties:
       mail.smtp.auth: false
-      mail.smtp.starttls.enable: true
+      mail.smtp.starttls.enable: false  # Mailpit has no STARTTLS
+      mail.smtp.connectiontimeout: 5000
+      mail.smtp.timeout: 5000
+      mail.smtp.writetimeout: 5000
+
+# Databases this ops service is allowed to manage.
+# Add any new microservice DB here.
+ops:
+  databases:
+    - user_db
+    - exam_db
+    - blog_db
+    - bookstore_db
+    - media_db
+  pg:
+    host: ${PG_HOST:localhost}
+    port: ${PG_PORT:5432}
+    user: ${PG_USER:postgres}
+    password: ${PG_PASS:postgrespassword}
+  mailpit:
+    base-url: ${MAILPIT_URL:http://localhost:8025}
 
 minio:
   endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
