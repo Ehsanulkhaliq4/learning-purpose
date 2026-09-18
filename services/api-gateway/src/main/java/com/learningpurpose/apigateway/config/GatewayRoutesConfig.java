@@ -32,6 +32,9 @@ public class GatewayRoutesConfig {
     @Value("${services.media-streaming-service}")
     private String mediaServiceUrl;
 
+    @Value("${services.platform-ops-service}")
+    private String platformOperationsService;
+
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -64,6 +67,11 @@ public class GatewayRoutesConfig {
                 .route("media-streaming-service", r -> r.path("/api/v1/media/**")
                         .filters(f -> f.filter(jwtFilter))
                         .uri(mediaServiceUrl))
+
+                // 7. Platform Operation service
+                .route("platform-ops-service", r -> r.path("/api/v1/ops/**")
+                        .filters(f -> f.filter(jwtFilter))
+                        .uri(platformOperationsService))
 
                 .build();
     }

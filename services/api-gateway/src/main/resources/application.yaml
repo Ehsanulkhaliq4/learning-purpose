@@ -23,6 +23,7 @@ services:
   blog-service: http://localhost:8084
   ai-chat-service: http://localhost:8086
   media-streaming-service: http://localhost:8087
+  platform-ops-service: http://localhost:8088
 
 logging:
   level:
