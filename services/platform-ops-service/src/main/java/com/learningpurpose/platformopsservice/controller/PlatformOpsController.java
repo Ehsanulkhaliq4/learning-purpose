@@ -1,5 +1,8 @@
 package com.learningpurpose.platformopsservice.controller;
 
+import com.learningpurpose.platformopsservice.dto.ColumnDefinition;
+import com.learningpurpose.platformopsservice.dto.DdlResult;
+import com.learningpurpose.platformopsservice.dto.TablePage;
 import com.learningpurpose.platformopsservice.service.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
@@ -52,14 +55,14 @@ public class PlatformOpsController {
 
     /** Get schema of a table in the chosen database. */
     @GetMapping("/database/{db}/tables/{tableName}/schema")
-    public ResponseEntity<List<DatabaseSchemaOpsService.ColumnDefinition>> getTableSchema(
+    public ResponseEntity<List<ColumnDefinition>> getTableSchema(
             @PathVariable String db, @PathVariable String tableName) {
         return ResponseEntity.ok(databaseSchemaOpsService.getTableSchema(db, tableName));
     }
 
     /** Execute a controlled DDL statement against the chosen database. */
     @PostMapping("/database/{db}/ddl")
-    public ResponseEntity<DatabaseSchemaOpsService.DdlResult> executeDdl(
+    public ResponseEntity<DdlResult> executeDdl(
             @PathVariable String db, @RequestBody Map<String, String> payload) {
         String ddl = payload.get("ddl");
         if (ddl == null || ddl.isBlank()) {
@@ -69,7 +72,7 @@ public class PlatformOpsController {
     }
 
     @GetMapping("/database/{db}/tables/{tableName}/rows")
-    public ResponseEntity<DatabaseSchemaOpsService.TablePage> listRows(
+    public ResponseEntity<TablePage> listRows(
             @PathVariable String db,
             @PathVariable String tableName,
             @RequestParam(defaultValue = "0")  int page,

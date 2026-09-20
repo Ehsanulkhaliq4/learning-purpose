@@ -1,5 +1,8 @@
 package com.learningpurpose.platformopsservice.service;
 
+import com.learningpurpose.platformopsservice.dto.ColumnDefinition;
+import com.learningpurpose.platformopsservice.dto.DdlResult;
+import com.learningpurpose.platformopsservice.dto.TablePage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -161,9 +164,4 @@ public class DatabaseSchemaOpsService {
         return "\"" + identifier + "\"";
     }
 
-    public record ColumnDefinition(String columnName, String dataType, boolean nullable,
-                                   String defaultValue, Integer maxLength) {}
-    public record DdlResult(boolean success, String message, long executionTimeMs) {}
-
-    public record TablePage(String database,String table,List<String> columns,List<Map<String, Object>> rows,int page, int size, long totalRows,int totalPages) {}
 }
