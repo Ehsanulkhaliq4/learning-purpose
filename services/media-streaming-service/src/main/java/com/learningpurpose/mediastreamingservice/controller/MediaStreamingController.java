@@ -2,12 +2,19 @@ package com.learningpurpose.mediastreamingservice.controller;
 
 import com.learningpurpose.mediastreamingservice.model.Video;
 import com.learningpurpose.mediastreamingservice.service.MediaStreamingService;
+import io.minio.GetObjectArgs;
+import io.minio.MinioClient;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.support.ResourceRegion;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +25,11 @@ import java.util.Map;
 public class MediaStreamingController {
 
     private final MediaStreamingService mediaService;
+
+    private final MinioClient minioClient;
+
+    @Value("${minio.bucket-name}")
+    private String bucketName;
 
     @GetMapping("/videos")
     public ResponseEntity<List<Video>> getCatalog() {
@@ -42,20 +54,49 @@ public class MediaStreamingController {
     }
 
     @GetMapping("/videos/{id}/stream")
-    public ResponseEntity<ResourceRegion> streamVideo(
-            @PathVariable Long id,
-            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader) {
+    public void streamVideo(@PathVariable Long id,
+                            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader,
+                            HttpServletResponse response) throws IOException {
 
         Video video = mediaService.getVideoMetadata(id);
-        List<HttpRange> ranges = HttpRange.parseRanges(rangeHeader);
-        HttpRange range = ranges.isEmpty() ? null : ranges.get(0);
+        long totalLength = video.getFileSize();
 
-        ResourceRegion region = mediaService.streamVideo(id, range);
+        long start = 0;
+        long end = totalLength - 1;
+        boolean isRange = rangeHeader != null && !rangeHeader.isBlank();
 
-        return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
-                .contentType(MediaType.parseMediaType(video.getContentType()))
-                .header(HttpHeaders.ACCEPT_RANGES, "bytes")
-                .body(region);
+        if (isRange) {
+            List<HttpRange> ranges = HttpRange.parseRanges(rangeHeader);
+            HttpRange range = ranges.get(0);
+            start = range.getRangeStart(totalLength);
+            end = range.getRangeEnd(totalLength);
+        }
+        long rangeLength = end - start + 1;
+
+        response.setContentType(video.getContentType());
+        response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
+        response.setHeader(HttpHeaders.CONTENT_LENGTH, String.valueOf(rangeLength));
+
+        if (isRange) {
+            response.setStatus(HttpStatus.PARTIAL_CONTENT.value());
+            response.setHeader(HttpHeaders.CONTENT_RANGE,
+                    "bytes " + start + "-" + end + "/" + totalLength);
+        } else {
+            response.setStatus(HttpStatus.OK.value());
+        }
+
+        try (InputStream in = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(bucketName)
+                        .object(video.getObjectName())
+                        .offset(start)
+                        .length(rangeLength)
+                        .build());
+             OutputStream out = response.getOutputStream()) {
+            in.transferTo(out);
+        } catch (Exception e) {
+            throw new IOException("MinIO stream failed", e);
+        }
     }
 
     @PostMapping("/videos/{id}/views")
