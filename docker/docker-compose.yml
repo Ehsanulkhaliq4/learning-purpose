@@ -101,6 +101,45 @@ services:
     networks:
       - learning-purpose-network
 
+  # -------------------------------------------------------------
+  # MongoDB (Sink Database for CQRS Read Model)
+  # -------------------------------------------------------------
+  mongodb:
+    image: mongo:7.0
+    container_name: learning-purpose-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodata:/data/db
+    networks:
+      - learning-purpose-network
+
+  # -------------------------------------------------------------
+  # Kafka Connect (Debezium Runtime)
+  # -------------------------------------------------------------
+  connect:
+    image: quay.io/debezium/connect:2.5
+    container_name: learning-purpose-connect
+    depends_on:
+      - kafka
+      - postgres
+      - mongodb
+    ports:
+      - "8089:8083"
+    environment:
+      BOOTSTRAP_SERVERS: 'kafka:29092' # Use internal listener
+      GROUP_ID: 'learning-purpose-connect-group'
+      CONFIG_STORAGE_TOPIC: 'connect_configs'
+      OFFSET_STORAGE_TOPIC: 'connect_offsets'
+      STATUS_STORAGE_TOPIC: 'connect_statuses'
+      CONNECT_REST_ADVERTISED_HOST_NAME: 'connect'
+      CONNECT_PLUGIN_PATH: '/kafka/connect,/kafka/connect/debezium-connector-mongodb'
+    volumes:
+      # Mount the MongoDB Sink Plugin (See step 1a below)
+      - ./debezium-connector-mongodb:/kafka/connect/debezium-connector-mongodb
+    networks:
+      - learning-purpose-network
+
 networks:
   learning-purpose-network:
     driver: bridge
@@ -109,4 +148,5 @@ volumes:
   pgdata:
   kafkadata:
   miniodata:
+  mongodata:
   pgadmindata:
