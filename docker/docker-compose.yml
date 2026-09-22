@@ -7,6 +7,7 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     container_name: learning-purpose-postgres
+    command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=4", "-c", "max_wal_senders=4"]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
@@ -133,10 +134,10 @@ services:
       OFFSET_STORAGE_TOPIC: 'connect_offsets'
       STATUS_STORAGE_TOPIC: 'connect_statuses'
       CONNECT_REST_ADVERTISED_HOST_NAME: 'connect'
-      CONNECT_PLUGIN_PATH: '/kafka/connect,/kafka/connect/debezium-connector-mongodb'
+      CONNECT_REST_PORT: '8083'
+      CONNECT_PLUGIN_PATH: '/kafka/connect,/kafka/connect/mongodb-kafka-connector'
     volumes:
-      # Mount the MongoDB Sink Plugin (See step 1a below)
-      - ./debezium-connector-mongodb:/kafka/connect/debezium-connector-mongodb
+      - ./mongodb-kafka-connector:/kafka/connect/mongodb-kafka-connector
     networks:
       - learning-purpose-network
 

@@ -1,0 +1,29 @@
+{
+    "name": "blog-postgres-source",
+    "config": {
+        "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+        "tasks.max": "1",
+        "database.hostname": "postgres",
+        "database.port": "5432",
+        "database.user": "postgres",
+        "database.password": "postgrespassword",
+        "database.dbname": "blog_db",
+        "topic.prefix": "blog-service",
+        "schema.include.list": "public",
+        "table.include.list": "public.posts,public.comments",
+        "database.server.name": "learning-purpose-postgres",
+        "plugin.name": "pgoutput",
+        "slot.name": "blog_slot",
+        "publication.name": "blog_publication",
+        "publication.autocreate.mode": "filtered",
+        "column.include.list": "public.posts.id,public.posts.content,public.posts.posted_by,public.posts.created_at,public.posts.tags,public.posts.image_storage_key,public.comments.id,public.comments.post_id,public.comments.posted_by",
+        "transforms": "unwrap",
+        "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+        "transforms.unwrap.drop.tombstones": "false",
+        "transforms.unwrap.delete.handling.mode": "rewrite",
+        "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+        "key.converter.schemas.enable": "false",
+        "value.converter.schemas.enable": "false"
+    }
+}
