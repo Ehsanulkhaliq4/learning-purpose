@@ -7,7 +7,12 @@ services:
   postgres:
     image: pgvector/pgvector:pg16
     container_name: learning-purpose-postgres
-    command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=4", "-c", "max_wal_senders=4"]
+    command: [
+      "postgres",
+      "-c", "wal_level=logical",
+      "-c", "max_replication_slots=10",
+      "-c", "max_wal_senders=10"
+    ]
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
@@ -48,7 +53,7 @@ services:
   # Message Broker: Apache Kafka (KRaft Mode - No Zookeeper)
   # -------------------------------------------------------------
   kafka:
-    image: confluentinc/cp-kafka:7.5.0
+    image: confluentinc/cp-kafka:7.6.0
     container_name: learning-purpose-kafka
     ports:
       - "9092:9092"
@@ -71,6 +76,40 @@ services:
       - kafkadata:/var/lib/kafka/data
     networks:
       - learning-purpose-network
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------------------------------------------------
+  # Debezium / Kafka Connect
+  # -------------------------------------------------------------
+  debezium:
+    image: debezium/connect:2.6
+    container_name: debezium-connect
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:29092
+      GROUP_ID: debezium-cluster
+      CONFIG_STORAGE_TOPIC: debezium_connect_configs
+      OFFSET_STORAGE_TOPIC: debezium_connect_offsets
+      STATUS_STORAGE_TOPIC: debezium_connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
 
   # -------------------------------------------------------------
   # Object Storage: MinIO (S3 Compatible API)
@@ -89,6 +128,11 @@ services:
       - miniodata:/data
     networks:
       - learning-purpose-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # -------------------------------------------------------------
   # Local SMTP Server: Mailpit (Email Mock & Web UI)
@@ -97,13 +141,13 @@ services:
     image: axllent/mailpit:latest
     container_name: learning-purpose-mailpit
     ports:
-      - "1025:1025" # SMTP port
-      - "8025:8025" # Web UI
+      - "1025:1025"
+      - "8025:8025"
     networks:
       - learning-purpose-network
 
   # -------------------------------------------------------------
-  # MongoDB (Sink Database for CQRS Read Model)
+  # MongoDB (Sink Database for CQRS Read Models)
   # -------------------------------------------------------------
   mongodb:
     image: mongo:7.0
@@ -114,32 +158,11 @@ services:
       - mongodata:/data/db
     networks:
       - learning-purpose-network
-
-  # -------------------------------------------------------------
-  # Kafka Connect (Debezium Runtime)
-  # -------------------------------------------------------------
-  connect:
-    image: quay.io/debezium/connect:2.5
-    container_name: learning-purpose-connect
-    depends_on:
-      - kafka
-      - postgres
-      - mongodb
-    ports:
-      - "8089:8083"
-    environment:
-      BOOTSTRAP_SERVERS: 'kafka:29092' # Use internal listener
-      GROUP_ID: 'learning-purpose-connect-group'
-      CONFIG_STORAGE_TOPIC: 'connect_configs'
-      OFFSET_STORAGE_TOPIC: 'connect_offsets'
-      STATUS_STORAGE_TOPIC: 'connect_statuses'
-      CONNECT_REST_ADVERTISED_HOST_NAME: 'connect'
-      CONNECT_REST_PORT: '8083'
-      CONNECT_PLUGIN_PATH: '/kafka/connect,/kafka/connect/mongodb-kafka-connector'
-    volumes:
-      - ./mongodb-kafka-connector:/kafka/connect/mongodb-kafka-connector
-    networks:
-      - learning-purpose-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   learning-purpose-network:

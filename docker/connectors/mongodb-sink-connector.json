@@ -5,7 +5,7 @@
     "tasks.max": "1",
     "topics": "blog-service.public.posts",
     "connection.uri": "mongodb://mongodb:27017",
-    "database": "blog_read_db",
+    "database": "blog_db",
     "collection": "posts",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter",
