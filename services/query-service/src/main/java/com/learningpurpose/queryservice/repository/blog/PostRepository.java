@@ -1,6 +1,7 @@
 package com.learningpurpose.queryservice.repository.blog;
 
 import com.learningpurpose.queryservice.document.blog.Post;
+import org.bson.types.ObjectId;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PostRepository extends MongoRepository<Post, String> {
+public interface PostRepository extends MongoRepository<Post, ObjectId> {
 
     @Query("{ '__deleted': { $ne: 'true' } }")
     Page<Post> findActivePosts(Pageable pageable);

@@ -1,6 +1,7 @@
 package com.learningpurpose.queryservice.document.blog;
 
 import lombok.Data;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -15,8 +16,9 @@ import java.util.List;
 @Document(collection = "posts")
 public class Post {
 
+    /** Mongo's native id — ObjectId, not String. */
     @Id
-    private String _id;
+    private ObjectId _id;
 
     @Field("id")
     private Long id;
@@ -27,9 +29,11 @@ public class Post {
     @Field("posted_by")
     private String postedBy;
 
+    /** Debezium writes this as an ISO-8601 string, not a Date. */
     @Field("created_at")
     private String createdAtRaw;
 
+    /** Debezium writes JSONB columns as a stringified JSON array. */
     @Field("tags")
     private String tagsRaw;
 
@@ -39,7 +43,7 @@ public class Post {
     @Field("__deleted")
     private String deleted;
 
-    // --- derived getters used by the service layer ---
+    // ─── derived getters used by the service ───────────────────────────
 
     public Instant getCreatedAt() {
         if (createdAtRaw == null || createdAtRaw.isBlank()) return null;
@@ -53,13 +57,11 @@ public class Post {
     public List<String> getTags() {
         if (tagsRaw == null || tagsRaw.isBlank()) return Collections.emptyList();
         try {
-            ObjectMapper mapper = new ObjectMapper();
             String trimmed = tagsRaw.trim();
-            // If it's a JSON array string, parse it.
             if (trimmed.startsWith("[")) {
-                return mapper.readValue(trimmed, new TypeReference<List<String>>() {});
+                return new ObjectMapper().readValue(
+                        trimmed, new TypeReference<List<String>>() {});
             }
-            // Otherwise treat it as a single tag.
             return List.of(trimmed);
         } catch (Exception e) {
             return Collections.emptyList();

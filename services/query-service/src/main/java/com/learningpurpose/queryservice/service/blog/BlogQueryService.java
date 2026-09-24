@@ -25,9 +25,9 @@ public class BlogQueryService {
     }
 
     public PostResponse getPost(Long id) {
-        Post post = postRepository.findActiveById(id)
+        return postRepository.findActiveById(id)
+                .map(this::toPostResponse)
                 .orElseThrow(() -> new NoSuchElementException("Post not found: " + id));
-        return toPostResponse(post);
     }
 
     public Page<PostResponse> listPostsByUser(String user, Pageable pageable) {
@@ -42,15 +42,13 @@ public class BlogQueryService {
         return commentRepository.findActiveByPostId(postId, pageable).map(this::toCommentResponse);
     }
 
-    // --- mapping helpers ---
-
     private PostResponse toPostResponse(Post p) {
         return PostResponse.builder()
                 .id(p.getId())
                 .content(p.getContent())
                 .postedBy(p.getPostedBy())
-                .createdAt(p.getCreatedAt())   // parses the String
-                .tags(p.getTags())             // parses the String
+                .createdAt(p.getCreatedAt())
+                .tags(p.getTags())
                 .imageStorageKey(p.getImageStorageKey())
                 .commentCount(commentRepository.countActiveByPostId(p.getId()))
                 .build();
