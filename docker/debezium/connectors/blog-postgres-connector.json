@@ -1,0 +1,22 @@
+{
+  "name": "blog-postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgrespassword",
+    "database.dbname": "blog_db",
+    "topic.prefix": "blog",
+    "plugin.name": "pgoutput",
+    "slot.name": "debezium",
+    "publication.name": "blog_publication",
+    "publication.autocreate.mode": "disabled",
+    "table.include.list": "public.posts",
+    "snapshot.mode": "initial",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false"
+  }
+}

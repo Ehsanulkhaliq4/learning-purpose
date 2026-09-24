@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # -------------------------------------------------------------
   # PostgreSQL Cluster (Multi-Database per Service)
@@ -108,6 +106,39 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8083/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - learning-purpose-network
+
+  debezium-ui:
+    image: debezium/debezium-ui:2.0
+    container_name: debezium-ui
+    ports:
+      - "9095:9095"
+    environment:
+      DEBEZIUM_CONNECT_URL: http://debezium-connect:8083
+    depends_on:
+      debezium:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
+
+  debezium-init:
+    image: curlimages/curl:latest
+    container_name: debezium-init
+    depends_on:
+      debezium:
+        condition: service_started
+    volumes:
+      - ./debezium/register-connectors.sh:/register-connectors.sh:ro
+      - ./debezium/connectors:/connectors:ro
+    entrypoint: ["/bin/sh", "/register-connectors.sh"]
+    restart: "no"
     networks:
       - learning-purpose-network
 
