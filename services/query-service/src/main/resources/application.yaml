@@ -3,19 +3,15 @@ server:
 
 spring:
   application:
-    name: blog-query-service
-
+    name: query-service
   data:
     mongodb:
-      uri: ${MONGO_URI:mongodb://localhost:27017/blog_read_db}
-      auto-index-creation: false   # read-only service; don't create indexes
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-
-logging:
-  level:
-    org.springframework.data.mongodb.core.MongoTemplate: INFO
+      uri: mongodb://localhost:27017/query-service
+      database: query-service
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: query-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
