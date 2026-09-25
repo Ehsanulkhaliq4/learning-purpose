@@ -119,9 +119,9 @@ services:
     image: debezium/debezium-ui:2.0
     container_name: debezium-ui
     ports:
-      - "9095:9095"
+      - "9095:8080"
     environment:
-      DEBEZIUM_CONNECT_URL: http://debezium-connect:8083
+      DEBEZIUM_CONNECT_URL: http://debezium:8083
     depends_on:
       debezium:
         condition: service_healthy
