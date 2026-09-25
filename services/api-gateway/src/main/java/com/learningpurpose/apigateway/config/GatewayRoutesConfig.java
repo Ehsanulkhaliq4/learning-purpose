@@ -35,6 +35,9 @@ public class GatewayRoutesConfig {
     @Value("${services.platform-ops-service}")
     private String platformOperationsService;
 
+    @Value("${services.query-service}")
+    private String queryService;
+
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         return builder.routes()
@@ -73,6 +76,9 @@ public class GatewayRoutesConfig {
                         .filters(f -> f.filter(jwtFilter))
                         .uri(platformOperationsService))
 
+                // 8. Public Service
+                .route("query-service", r -> r.path("/api/v1/public/**")
+                        .uri(queryService))
                 .build();
     }
 }

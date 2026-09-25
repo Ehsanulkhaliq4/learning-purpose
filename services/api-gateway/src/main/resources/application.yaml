@@ -24,6 +24,7 @@ services:
   media-streaming-service: http://localhost:8086
   ai-chat-service: http://localhost:8087
   platform-ops-service: http://localhost:8088
+  query-service: http://localhost:8090
 
 logging:
   level:
