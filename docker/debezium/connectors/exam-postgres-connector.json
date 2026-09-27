@@ -1,0 +1,22 @@
+{
+  "name": "exam-postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgrespassword",
+    "database.dbname": "exam_db",
+    "topic.prefix": "exam",
+    "plugin.name": "pgoutput",
+    "slot.name": "exam_debezium",
+    "publication.name": "exam_publication",
+    "publication.autocreate.mode": "disabled",
+    "table.include.list": "public.categories,public.quizzes",
+    "snapshot.mode": "initial",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}
