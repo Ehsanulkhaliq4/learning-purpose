@@ -23,3 +23,10 @@ CREATE TABLE IF NOT EXISTS comments (
 CREATE INDEX IF NOT EXISTS idx_posts_posted_by ON posts(posted_by);
 CREATE INDEX IF NOT EXISTS idx_posts_tags_jsonb ON posts USING gin (tags);
 CREATE INDEX IF NOT EXISTS idx_comments_post ON comments(post_id);
+
+-- =========================================================
+-- Debezium logical replication publication
+-- =========================================================
+
+CREATE PUBLICATION blog_publication
+FOR TABLE public.posts;

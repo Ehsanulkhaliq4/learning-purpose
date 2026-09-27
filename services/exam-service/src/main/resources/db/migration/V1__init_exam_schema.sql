@@ -32,3 +32,20 @@ CREATE TABLE IF NOT EXISTS questions (
 CREATE INDEX IF NOT EXISTS idx_quizzes_category ON quizzes(category_id);
 CREATE INDEX IF NOT EXISTS idx_questions_quiz ON questions(quiz_id);
 CREATE INDEX IF NOT EXISTS idx_questions_options_jsonb ON questions USING gin (options);
+
+-- =========================================================
+-- Debezium logical replication publication
+-- =========================================================
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_publication
+        WHERE pubname = 'exam_publication'
+    ) THEN
+        CREATE PUBLICATION exam_publication
+        FOR TABLE public.categories, public.quizzes;
+END IF;
+END
+$$;

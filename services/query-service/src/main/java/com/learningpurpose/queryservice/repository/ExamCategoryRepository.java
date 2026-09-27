@@ -1,4 +1,8 @@
 package com.learningpurpose.queryservice.repository;
 
-public class ExamCategoryRepository {
+import com.learningpurpose.queryservice.document.ExamCategoryDocument;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface ExamCategoryRepository
+        extends MongoRepository<ExamCategoryDocument, Long> {
 }
