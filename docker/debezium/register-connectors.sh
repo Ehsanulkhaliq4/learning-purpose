@@ -68,6 +68,13 @@ register_connector \
     "exam-postgres-connector" \
     "/connectors/exam-postgres-connector.json"
 
+# =========================================================
+# Book Service
+# =========================================================
+
+register_connector \
+    "book-postgres-connector" \
+    "/connectors/book-postgres-connector.json"
 
 echo "=========================================="
 echo "All connector registrations completed."

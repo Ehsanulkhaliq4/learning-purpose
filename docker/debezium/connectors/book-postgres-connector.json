@@ -1,0 +1,22 @@
+{
+  "name": "book-postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgrespassword",
+    "database.dbname": "bookstore_db",
+    "topic.prefix": "book",
+    "plugin.name": "pgoutput",
+    "slot.name": "book_debezium",
+    "publication.name": "book_publication",
+    "publication.autocreate.mode": "disabled",
+    "table.include.list": "public.book_catalog",
+    "snapshot.mode": "initial",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
+  }
+}

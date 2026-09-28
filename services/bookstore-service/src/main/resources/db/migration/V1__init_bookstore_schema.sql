@@ -11,3 +11,20 @@ CREATE TABLE IF NOT EXISTS book_catalog (
 
 CREATE INDEX IF NOT EXISTS idx_books_title ON book_catalog(book_title);
 CREATE INDEX IF NOT EXISTS idx_books_author ON book_catalog(book_author_name);
+
+-- =========================================================
+-- Debezium logical replication publication
+-- =========================================================
+
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM pg_publication
+        WHERE pubname = 'book_publication'
+    ) THEN
+        CREATE PUBLICATION book_publication
+        FOR TABLE public.book_catalog;
+END IF;
+END
+$$;
