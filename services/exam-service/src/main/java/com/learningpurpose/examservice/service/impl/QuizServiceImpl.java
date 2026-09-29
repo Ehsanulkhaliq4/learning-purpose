@@ -148,6 +148,9 @@ public class QuizServiceImpl implements QuizService {
                     .passed(result.isPassed())
                     .submittedAt(Instant.now())
                     .build();
+
+
+
             try {
                 String payload = objectMapper.writeValueAsString(event);
                 kafkaTemplate.send(TOPIC_EXAM_SUBMITTED, submission.getUserEmail(), payload);
