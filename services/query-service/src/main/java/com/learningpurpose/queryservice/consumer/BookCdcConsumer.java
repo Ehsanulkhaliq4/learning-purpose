@@ -34,7 +34,7 @@ public class BookCdcConsumer {
 
             JsonNode event = objectMapper.readTree(message);
 
-            String operation = event.get("op").asText();
+            String operation = event.get("op").asString();
 
             log.info("Book CDC Operation: {}", operation);
 
@@ -75,42 +75,42 @@ public class BookCdcConsumer {
         book.setId(after.get("id").asLong());
 
         book.setBookTitle(
-                after.get("book_title").asText()
+                after.get("book_title").asString()
         );
 
         book.setBookAuthorName(
-                after.get("book_author_name").asText()
+                after.get("book_author_name").asString()
         );
 
         if (!after.get("posted_date").isNull()) {
             book.setPostedDate(
                     Instant.parse(
-                            after.get("posted_date").asText()
+                            after.get("posted_date").asString()
                     )
             );
         }
 
         if (!after.get("content_type").isNull()) {
             book.setContentType(
-                    after.get("content_type").asText()
+                    after.get("content_type").asString()
             );
         }
 
         if (!after.get("book_description").isNull()) {
             book.setBookDescription(
-                    after.get("book_description").asText()
+                    after.get("book_description").asString()
             );
         }
 
         if (!after.get("cover_image_key").isNull()) {
             book.setCoverImageKey(
-                    after.get("cover_image_key").asText()
+                    after.get("cover_image_key").asString()
             );
         }
 
         if (!after.get("pdf_storage_key").isNull()) {
             book.setPdfStorageKey(
-                    after.get("pdf_storage_key").asText()
+                    after.get("pdf_storage_key").asString()
             );
         }
 

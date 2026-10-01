@@ -25,3 +25,7 @@ minio:
   access-key: minioadmin
   secret-key: minioadminpassword
   bucket-name: media-stream-bucket
+
+mediasoup:
+  service:
+    url: http://localhost:3000

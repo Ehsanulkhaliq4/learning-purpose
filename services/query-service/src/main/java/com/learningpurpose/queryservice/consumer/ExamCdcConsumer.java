@@ -42,7 +42,7 @@ public class ExamCdcConsumer {
 
             JsonNode event = objectMapper.readTree(message);
 
-            String operation = event.get("op").asText();
+            String operation = event.get("op").asString();
 
             log.info("Exam Category CDC Operation: {}", operation);
 
@@ -87,13 +87,13 @@ public class ExamCdcConsumer {
         );
 
         category.setTitle(
-                after.get("title").asText()
+                after.get("title").asString()
         );
 
         if (!after.get("description").isNull()) {
 
             category.setDescription(
-                    after.get("description").asText()
+                    after.get("description").asString()
             );
         }
 
@@ -101,7 +101,7 @@ public class ExamCdcConsumer {
 
             category.setCreatedAt(
                     Instant.parse(
-                            after.get("created_at").asText()
+                            after.get("created_at").asString()
                     )
             );
         }
@@ -153,7 +153,7 @@ public class ExamCdcConsumer {
 
             JsonNode event = objectMapper.readTree(message);
 
-            String operation = event.get("op").asText();
+            String operation = event.get("op").asString();
 
             log.info("Quiz CDC Operation: {}", operation);
 
@@ -202,13 +202,13 @@ public class ExamCdcConsumer {
         );
 
         quiz.setTitle(
-                after.get("title").asText()
+                after.get("title").asString()
         );
 
         if (!after.get("description").isNull()) {
 
             quiz.setDescription(
-                    after.get("description").asText()
+                    after.get("description").asString()
             );
         }
 
@@ -228,7 +228,7 @@ public class ExamCdcConsumer {
 
             quiz.setCreatedAt(
                     Instant.parse(
-                            after.get("created_at").asText()
+                            after.get("created_at").asString()
                     )
             );
         }

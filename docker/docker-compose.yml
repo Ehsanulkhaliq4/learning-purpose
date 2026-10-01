@@ -195,6 +195,19 @@ services:
       timeout: 5s
       retries: 5
 
+  mediasoup-service:
+    build:
+      context: ../services/mediasoup-service
+      dockerfile: Dockerfile
+    container_name: learning-purpose-mediasoup-service
+    ports:
+      - "3000:3000"
+    networks:
+      - learning-purpose-network
+    depends_on:
+      kafka:
+        condition: service_healthy
+
 networks:
   learning-purpose-network:
     driver: bridge
