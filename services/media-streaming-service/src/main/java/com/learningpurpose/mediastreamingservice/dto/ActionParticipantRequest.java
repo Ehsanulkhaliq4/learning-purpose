@@ -10,10 +10,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JoinParticipantRequest {
+public class ActionParticipantRequest {
 
     @NotBlank(message = "userId is required")
     private String userId;
-
-    private String displayName;
 }

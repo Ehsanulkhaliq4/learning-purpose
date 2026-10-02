@@ -1,25 +1,37 @@
 package com.learningpurpose.mediastreamingservice.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.learningpurpose.mediastreamingservice.dto.*;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestClient;
 
-@Service
-@RequiredArgsConstructor
-public class MediaService {
+public interface MediaService {
+    // Rooms
+    JsonNode createRoom(CreateRoomRequest request);
+    ActiveRoomsListResponse getAllRooms();
+    JsonNode getRoomDetails(String roomId);
+    JsonNode deleteRoom(String roomId);
 
-    private final RestClient mediasoupRestClient;
+    // Participants
+    JsonNode joinParticipant(String roomId, JoinParticipantRequest request);
+    ParticipantsListResponse getParticipants(String roomId);
+    JsonNode removeParticipant(String roomId, String participantId);
 
-    public CreateRoomResponse createRoom(CreateRoomRequest request){
-        return mediasoupRestClient.post().uri("/api/rooms").body(request).retrieve().body(CreateRoomResponse.class);
-    }
+    // Transports
+    JsonNode createTransport(String roomId, CreateTransportRequest request);
+    JsonNode connectTransport(String roomId, String transportId, ConnectTransportRequest request);
+    JsonNode getParticipantTransports(String roomId, String userId);
 
-    public JoinParticipantResponse joinParticipant(String roomId, JoinParticipantRequest request){
-        return mediasoupRestClient.post().uri("/api/rooms/{roomId}/participants",roomId).body(request).retrieve().body(JoinParticipantResponse.class);
-    }
+    // Producers
+    JsonNode createProducer(String roomId, CreateProducerRequest request);
+    JsonNode pauseProducer(String roomId, String producerId, ActionParticipantRequest request);
+    JsonNode resumeProducer(String roomId, String producerId, ActionParticipantRequest request);
+    JsonNode deleteProducer(String roomId, String producerId, ActionParticipantRequest request);
 
-    public CreateTransportResponse createTransport(String roomId, CreateTransportRequest request){
-        return mediasoupRestClient.post().uri( "/api/rooms/{roomId}/transports",roomId).body(request).retrieve().body(CreateTransportResponse.class);
-    }
+    // Consumers
+    JsonNode createConsumer(String roomId, CreateConsumerRequest request);
+    JsonNode pauseConsumer(String roomId, String consumerId, ActionParticipantRequest request);
+    JsonNode resumeConsumer(String roomId, String consumerId, ActionParticipantRequest request);
+    JsonNode deleteConsumer(String roomId, String consumerId, ActionParticipantRequest request);
+
+    // Stats
+    JsonNode getConferenceStats();
 }

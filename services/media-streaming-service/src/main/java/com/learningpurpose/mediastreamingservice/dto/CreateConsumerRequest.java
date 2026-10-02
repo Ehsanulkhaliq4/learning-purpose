@@ -1,5 +1,6 @@
 package com.learningpurpose.mediastreamingservice.dto;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,10 +11,16 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class JoinParticipantRequest {
+public class CreateConsumerRequest {
 
     @NotBlank(message = "userId is required")
     private String userId;
 
-    private String displayName;
+    @NotBlank(message = "transportId is required")
+    private String transportId;
+
+    @NotBlank(message = "producerId is required")
+    private String producerId;
+
+    private JsonNode rtpCapabilities;
 }
