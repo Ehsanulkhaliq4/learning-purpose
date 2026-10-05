@@ -32,3 +32,8 @@ minio:
   access-key: minioadmin
   secret-key: minioadminpassword
   bucket-name: learning-purpose-books
+
+logging:
+  logstash:
+    host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5000}

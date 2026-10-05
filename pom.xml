@@ -43,6 +43,7 @@
     <jjwt.version>0.12.5</jjwt.version>
     <flyway.version>10.8.1</flyway.version>
     <lombok.version>1.18.38</lombok.version>
+    <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
 
     <!-- Encoding -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -64,6 +65,8 @@
     <module>services/notification-service</module>
     <module>services/ai-chat-service</module>
     <module>services/media-streaming-service</module>
+    <module>services/platform-ops-service</module> 
+    <module>services/query-service</module>
 
 </modules>
 
@@ -154,6 +157,20 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
+        </dependency>
+
+        <!-- =================================================
+             Logstash Logback Encoder
+             ================================================= -->
+
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback-encoder.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
         </dependency>
 
     </dependencies>

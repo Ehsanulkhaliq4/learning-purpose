@@ -3,7 +3,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <!-- Read service identity & target destination from application.yml -->
-    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="notification-service"/>
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="exam-service"/>
     <springProperty scope="context" name="logstashHost" source="logging.logstash.host" defaultValue="localhost"/>
     <springProperty scope="context" name="logstashPort" source="logging.logstash.port" defaultValue="5000"/>
 

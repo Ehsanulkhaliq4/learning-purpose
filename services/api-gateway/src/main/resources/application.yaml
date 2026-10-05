@@ -30,3 +30,6 @@ logging:
   level:
     com.learningpurpose.apigateway: DEBUG
     io.jsonwebtoken: DEBUG
+  logstash:
+    host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5000}

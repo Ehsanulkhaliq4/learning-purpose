@@ -29,3 +29,8 @@ spring:
       acks: all
       properties:
         spring.json.add.type.headers: false
+
+logging:
+  logstash:
+    host: ${LOGSTASH_HOST:localhost}
+    port: ${LOGSTASH_PORT:5000}
