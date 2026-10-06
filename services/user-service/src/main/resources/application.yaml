@@ -45,6 +45,9 @@ jwt:
   expiration-ms: 86400000
 
 logging:
-  logstash:
-    host: ${LOGSTASH_HOST:localhost}
-    port: ${LOGSTASH_PORT:5000}
+  file:
+    name: logs/user-service.log
+  level:
+    root: INFO
+    com.learningpurpose.userservice: DEBUG
+  

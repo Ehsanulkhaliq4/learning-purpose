@@ -29,8 +29,3 @@ minio:
 mediasoup:
   service:
     url: ${MEDIASOUP_URL:http://localhost:3000}
-
-logging:
-  logstash:
-    host: ${LOGSTASH_HOST:localhost}
-    port: ${LOGSTASH_PORT:5000}

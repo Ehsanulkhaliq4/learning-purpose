@@ -1,0 +1,26 @@
+filebeat.inputs:
+  - type: filestream
+    id: user-service
+    enabled: true
+    paths:
+      - /logs/user-service/user-service.log
+    fields:
+      service_name: user-service
+      environment: local
+    fields_under_root: true
+  - type: filestream
+    id: api-gateway
+    enabled: true
+    paths:
+      - /logs/api-gateway/api-gateway.log
+    fields:
+      service_name: api-gateway
+      environment: local
+    fields_under_root: true
+output.elasticsearch:
+  hosts:
+    - "http://elasticsearch:9200"
+setup.kibana:
+  host: 
+    - "http://kibana:5601"
+logging.level: info

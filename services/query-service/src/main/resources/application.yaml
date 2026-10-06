@@ -15,8 +15,3 @@ spring:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
 
-
-logging:
-  logstash:
-    host: ${LOGSTASH_HOST:localhost}
-    port: ${LOGSTASH_PORT:5000}

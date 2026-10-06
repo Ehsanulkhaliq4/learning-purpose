@@ -195,6 +195,9 @@ services:
       timeout: 5s
       retries: 5
 
+  # -------------------------------------------------------------
+  # Media Streaming Service
+  # -------------------------------------------------------------
   mediasoup-service:
     build:
       context: ../services/mediasoup-service
@@ -208,41 +211,58 @@ services:
       kafka:
         condition: service_healthy
 
+  # -------------------------------------------------------------
+  # Elasticsearch (Logs)
+  # -------------------------------------------------------------
+
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.0
-    container_name: elasticsearch
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
+    container_name: learning-purpose-elasticsearch
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
       - "9200:9200"
     volumes:
-      - es_data:/usr/share/elasticsearch/data
+      - elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - learning-purpose-network
 
-  logstash:
-    image: docker.elastic.co/logstash/logstash:8.15.0
-    container_name: logstash
-    volumes:
-      - ./logstash/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
-    ports:
-      - "5000:5000/tcp"
+  # -------------------------------------------------------------
+  # Kibana (Elasticsearch UI)
+  # -------------------------------------------------------------
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.3
+    container_name: learning-purpose-kibana
     environment:
-      - "LS_JAVA_OPTS=-Xms256m -Xmx256m"
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "5601:5601"
     depends_on:
       - elasticsearch
     networks:
       - learning-purpose-network
 
-  kibana:
-    image: docker.elastic.co/kibana/kibana:8.15.0
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - "5601:5601"
+  # -------------------------------------------------------------
+  # Kibana (Elasticsearch UI)
+  # -------------------------------------------------------------
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:8.15.3
+    container_name: learning-purpose-filebeat
+    user: root
+    command:
+      - -e
+      - --strict.perms=false
+    volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      # user-service logs
+      - ../services/user-service/logs:/logs/user-service:ro
+      # api-gateway logs
+      - ../services/api-gateway/logs:/logs/api-gateway:ro
     depends_on:
       - elasticsearch
     networks:
@@ -254,8 +274,8 @@ networks:
 
 volumes:
   pgdata:
-  es_data:
   kafkadata:
   miniodata:
   mongodata:
   pgadmindata:
+  elasticsearch-data:

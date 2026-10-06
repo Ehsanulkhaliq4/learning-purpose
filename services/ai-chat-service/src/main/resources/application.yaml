@@ -31,8 +31,3 @@ spring:
 app:
   services:
     exam-service-url: ${EXAM_SERVICE_URL:http://localhost:8082}
-
-logging:
-  logstash:
-    host: ${LOGSTASH_HOST:localhost}
-    port: ${LOGSTASH_PORT:5000}

@@ -27,9 +27,8 @@ services:
   query-service: http://localhost:8090
 
 logging:
+  file:
+    name: logs/api-gateway.log
   level:
     com.learningpurpose.apigateway: DEBUG
     io.jsonwebtoken: DEBUG
-  logstash:
-    host: ${LOGSTASH_HOST:localhost}
-    port: ${LOGSTASH_PORT:5000}
