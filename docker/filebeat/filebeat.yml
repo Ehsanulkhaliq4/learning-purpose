@@ -17,6 +17,69 @@ filebeat.inputs:
       service_name: api-gateway
       environment: local
     fields_under_root: true
+  - type: filestream
+    id: exam-service
+    enabled: true
+    paths:
+      - /logs/exam-service/exam-service.log
+    fields:
+      service_name: exam-service
+      environment: local
+    fields_under_root: true
+  - type: filestream
+    id: blog-service
+    enabled: true
+    paths:
+      - /logs/blog-service/blog-service.log
+    fields:
+      service_name: blog-service
+      environment: local
+    fields_under_root: true
+  - type: filestream
+    id: bookstore-service
+    enabled: true
+    paths:
+      - /logs/bookstore-service/bookstore-service.log
+    fields:
+      service_name: bookstore-service
+      environment: local
+    fields_under_root: true
+  - type: filestream
+    id: media-streaming-service
+    enabled: true
+    paths:
+      - /logs/media-streaming-service/media-streaming-service.log
+    fields:
+      service_name: media-streaming-service
+      environment: local
+    fields_under_root: true
+  - type: filestream
+    id: notification-service
+    enabled: true
+    paths:
+      - /logs/notification-service/notification-service.log
+    fields:
+      service_name: notification-service
+      environment: local
+    fields_under_root: true
+  - type: filestream
+    id: platform-ops-service
+    enabled: true
+    paths:
+      - /logs/platform-ops-service/platform-ops-service.log
+    fields:
+      service_name: platform-ops-service
+      environment: local
+    fields_under_root: true
+  - type: filestream
+    id: query-service
+    enabled: true
+    paths:
+      - /logs/query-service/query-service.log
+    fields:
+      service_name: query-service
+      environment: local
+    fields_under_root: true
 output.elasticsearch:
   hosts:
     - "http://elasticsearch:9200"

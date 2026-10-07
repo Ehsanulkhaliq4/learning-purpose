@@ -29,3 +29,7 @@ minio:
 mediasoup:
   service:
     url: ${MEDIASOUP_URL:http://localhost:3000}
+
+logging:
+  file:
+    name: logs/media-streaming-service.log

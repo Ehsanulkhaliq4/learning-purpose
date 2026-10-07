@@ -32,3 +32,7 @@ minio:
   access-key: minioadmin
   secret-key: minioadminpassword
   bucket-name: learning-purpose-books
+
+logging:
+  file:
+    name: logs/bookstore-service.log

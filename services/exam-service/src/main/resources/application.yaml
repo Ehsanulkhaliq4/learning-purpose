@@ -29,3 +29,8 @@ spring:
       acks: all
       properties:
         spring.json.add.type.headers: false
+
+
+logging:
+  file:
+    name: logs/exam-service.log

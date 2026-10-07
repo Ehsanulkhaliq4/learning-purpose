@@ -26,3 +26,7 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.learningpurpose.*"
+
+logging:
+  file:
+    name: logs/notification-service.log

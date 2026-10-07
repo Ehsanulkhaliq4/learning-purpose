@@ -263,6 +263,20 @@ services:
       - ../services/user-service/logs:/logs/user-service:ro
       # api-gateway logs
       - ../services/api-gateway/logs:/logs/api-gateway:ro
+      # exam-service logs
+      - ../services/exam-service/logs:/logs/exam-service:ro
+      # blog-service logs
+      - ../services/blog-service/logs:/logs/blog-service:ro
+      # bookstore-service logs
+      - ../services/bookstore-service/logs:/logs/bookstore-service:ro
+      # media-streaming-service logs
+      - ../services/media-streaming-service/logs:/logs/media-streaming-service:ro
+      # notification-service logs
+      - ../services/notification-service/logs:/logs/notification-service:ro
+      # platform-ops-service logs
+      - ../services/platform-ops-service/logs:/logs/platform-ops-service:ro
+      # query-service logs
+      - ../services/query-service/logs:/logs/query-service:ro
     depends_on:
       - elasticsearch
     networks:
