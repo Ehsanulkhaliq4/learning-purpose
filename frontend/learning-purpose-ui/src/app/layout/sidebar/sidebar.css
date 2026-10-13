@@ -144,8 +144,8 @@
   border-top: 1px solid var(--sidebar-border);
 }
 
-/* ── User profile card (desktop sidebar + mobile menu) ── */
-.user-profile-card {
+/* Company branding in the desktop sidebar and mobile menu */
+.company-brand-card {
   display: flex;
   align-items: center;
   gap: 0.65rem;
@@ -156,56 +156,34 @@
   transition: background 0.15s;
 }
 
-.user-avatar-wrap {
-  position: relative;
-  flex: 0 0 auto;
-}
-
-.user-avatar {
+.company-brand-mark {
   width: 34px;
   height: 34px;
+  flex: 0 0 auto;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--sky-400) 0%, var(--sky-600) 100%);
   color: #fff;
-  font-weight: 700;
   font-size: 0.85rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.user-online-dot {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--status-success);
-  border: 2px solid var(--sidebar-bg);
-}
-
-.user-info {
+.company-brand-info {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
 }
 
-.user-display-name {
+.company-brand-name {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--sidebar-text-bright);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.user-role-label {
-  font-size: 0.6rem;
-  color: var(--sidebar-text-muted);
-  letter-spacing: 0.02em;
 }
 
 .logout-icon-btn {
@@ -386,8 +364,8 @@
     border-top: 1px solid var(--surface-border);
   }
 
-  /* User profile card inside mobile dropdown */
-  .mobile-menu-open .user-profile-card {
+  /* Company branding inside the mobile dropdown */
+  .mobile-menu-open .company-brand-card {
     display: flex;
     align-items: center;
     gap: 0.6rem;
@@ -397,27 +375,15 @@
     border: 1px solid var(--sky-200);
   }
 
-  .mobile-menu-open .user-avatar {
+  .mobile-menu-open .company-brand-mark {
     width: 32px;
     height: 32px;
     font-size: 0.8rem;
   }
 
-  .mobile-menu-open .user-online-dot {
-    border-color: #e0f2fe;
-  }
-
-  .mobile-menu-open .user-display-name {
+  .mobile-menu-open .company-brand-name {
     color: var(--text-main);
     font-size: 0.72rem;
-  }
-
-  .mobile-menu-open .user-role-label {
-    color: var(--sky-600);
-    font-size: 0.58rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
   }
 
   .mobile-menu-open .logout-icon-btn {
