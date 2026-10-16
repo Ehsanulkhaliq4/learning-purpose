@@ -7,8 +7,8 @@ spring:
   application:
     name: notification-service
   mail:
-    host: localhost
-    port: 1025
+    host: ${SPRING_MAIL_HOST:localhost}
+    port: ${SPRING_MAIL_PORT:1025}
     username: ""
     password: ""
     properties:
@@ -18,7 +18,7 @@ spring:
           starttls:
             enable: false
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       group-id: notification-service-group
       auto-offset-reset: earliest
