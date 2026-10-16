@@ -212,6 +212,218 @@ services:
         condition: service_healthy
 
   # -------------------------------------------------------------
+  # APPLICATION MICROSERVICES
+  # -------------------------------------------------------------
+
+  api-gateway:
+    build:
+      context: ../services/api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SERVICES_USER_SERVICE=http://user-service:8081
+      - SERVICES_EXAM_SERVICE=http://exam-service:8082
+      - SERVICES_BLOG_SERVICE=http://blog-service:8084
+      - SERVICES_BOOKSTORE_SERVICE=http://bookstore-service:8085
+      - SERVICES_MEDIA_STREAMING_SERVICE=http://media-streaming-service:8086
+      - SERVICES_AI_CHAT_SERVICE=http://ai-chat-service:8087
+      - SERVICES_PLATFORM_OPS_SERVICE=http://platform-ops-service:8088
+      - SERVICES_QUERY_SERVICE=http://query-service:8090
+    depends_on:
+      - user-service
+      - exam-service
+    networks:
+      - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  user-service:
+    build:
+      context: ../services/user-service
+      dockerfile: Dockerfile
+    container_name: learning-purpose-user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_db
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  exam-service:
+    build:
+      context: ../services/exam-service
+      dockerfile: Dockerfile
+    container_name: learning-purpose-exam-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/exam_db
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  blog-service:
+    build:
+      context: ../services/blog-service
+      dockerfile: Dockerfile
+    container_name: learning-purpose-blog-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/blog_db
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - MINIO_ENDPOINT=http://minio:9000
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  bookstore-service:
+    build:
+      context: ../services/bookstore-service
+      dockerfile: Dockerfile
+    container_name: learning-purpose-bookstore-service
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bookstore_db
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - MINIO_ENDPOINT=http://minio:9000
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  media-streaming-service:
+    build:
+      context: ../services/media-streaming-service
+      dockerfile: Dockerfile
+    container_name: learning-purpose-media-streaming-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/media_streaming_db
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - MINIO_ENDPOINT=http://minio:9000
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  notification-service:
+    build:
+      context: ../services/notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    ports: 
+      - "8095:8085"
+    environment:
+      - SPRING_MAIL_HOST=mailpit
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  ai-chat-service:
+    build: 
+      context: ../services/ai-chat-service
+      dockerfile: Dockerfile
+    container_name: ai-chat-service
+    ports: 
+      - "8087:8087"
+    environment:
+      - EXAM_SERVICE_URL=http://exam-service:8082
+    networks:
+      - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  platform-ops-service:
+    build:
+      context: ../services/platform-ops-service
+      dockerfile: Dockerfile
+    container_name: platform-ops-service
+    ports:
+      - "8088:8088"
+    environment:
+      - PG_HOST=postgres
+      - KAFKA_SERVERS=kafka:29092
+      - MAIL_HOST=mailpit
+      - MINIO_ENDPOINT=http://minio:9000
+      - MAILPIT_URL=http://mailpit:8025
+    depends_on:
+      postgres: 
+        condition: service_healthy
+      kafka: 
+        condition: service_healthy 
+    networks: 
+        - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  query-service:
+    build:
+      context: ../services/query-service
+      dockerfile: Dockerfile
+    container_name: query-service
+    ports: 
+      - "8090:8090"
+    environment:
+      - SPRING_MONGODB_URI=mongodb://mongodb:27017/query-service
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+    depends_on:
+      mongodb: 
+        condition: service_started 
+      kafka: 
+        condition: service_healthy 
+    networks: 
+        - learning-purpose-network
+    volumes:
+      - m2_cache:/root/.m2
+
+  # -------------------------------------------------------------
   # Elasticsearch (Logs)
   # -------------------------------------------------------------
 
@@ -293,3 +505,4 @@ volumes:
   mongodata:
   pgadmindata:
   elasticsearch-data:
+  m2_cache:
