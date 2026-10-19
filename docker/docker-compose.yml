@@ -333,7 +333,7 @@ services:
     ports:
       - "8086:8086"
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/media_streaming_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/media_db
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - MINIO_ENDPOINT=http://minio:9000
     depends_on:
