@@ -159,11 +159,30 @@ services:
       - miniodata:/data
     networks:
       - learning-purpose-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    # REMOVED HEALTHCHECK (Use minio-init to wait instead)
+
+  # -------------------------------------------------------------
+  # MinIO Bucket Initialization (Creates buckets automatically)
+  # -------------------------------------------------------------
+  minio-init:
+    image: minio/minio:latest  # CHANGED TO QUAY.IO
+    container_name: learning-purpose-minio-init
+    depends_on:
+      minio:
+        condition: service_started
+    entrypoint: >
+      /bin/sh -c "
+      echo 'Waiting for MinIO to start...';
+      until mc alias set myminio http://minio:9000 minioadmin minioadminpassword; do echo 'Waiting...'; sleep 2; done;
+      echo 'Creating buckets...';
+      mc mb --ignore-existing myminio/learning-purpose-blogs;
+      mc mb --ignore-existing myminio/learning-purpose-books;
+      mc mb --ignore-existing myminio/media-stream-bucket;
+      echo 'Buckets created successfully!';
+      exit 0;
+      "
+    networks:
+      - learning-purpose-network
 
   # -------------------------------------------------------------
   # Local SMTP Server: Mailpit (Email Mock & Web UI)
@@ -290,13 +309,15 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/blog_db
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadminpassword
     depends_on:
       kafka:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      minio:
-        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully # WAIT FOR BUCKETS
     networks:
       - learning-purpose-network
     volumes:
@@ -313,13 +334,15 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/bookstore_db
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadminpassword
     depends_on:
       kafka:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      minio:
-        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully # WAIT FOR BUCKETS
     networks:
       - learning-purpose-network
     volumes:
@@ -336,13 +359,15 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/media_db
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadminpassword
     depends_on:
       kafka:
         condition: service_healthy
       postgres:
         condition: service_healthy
-      minio:
-        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully # WAIT FOR BUCKETS
     networks:
       - learning-purpose-network
     volumes:
@@ -424,9 +449,23 @@ services:
       - m2_cache:/root/.m2
 
   # -------------------------------------------------------------
+  # FRONTEND: Angular Application
+  # -------------------------------------------------------------
+  frontend:
+    build:
+      context: ../frontend/learning-purpose-ui
+      dockerfile: Dockerfile
+    container_name: learning-purpose-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - learning-purpose-network
+
+  # -------------------------------------------------------------
   # Elasticsearch (Logs)
   # -------------------------------------------------------------
-
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.15.3
     container_name: learning-purpose-elasticsearch
@@ -445,7 +484,6 @@ services:
   # -------------------------------------------------------------
   # Kibana (Elasticsearch UI)
   # -------------------------------------------------------------
-
   kibana:
     image: docker.elastic.co/kibana/kibana:8.15.3
     container_name: learning-purpose-kibana
@@ -459,9 +497,8 @@ services:
       - learning-purpose-network
 
   # -------------------------------------------------------------
-  # Kibana (Elasticsearch UI)
+  # Filebeat (Log shipper)
   # -------------------------------------------------------------
-
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.15.3
     container_name: learning-purpose-filebeat
@@ -471,23 +508,14 @@ services:
       - --strict.perms=false
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      # user-service logs
       - ../services/user-service/logs:/logs/user-service:ro
-      # api-gateway logs
       - ../services/api-gateway/logs:/logs/api-gateway:ro
-      # exam-service logs
       - ../services/exam-service/logs:/logs/exam-service:ro
-      # blog-service logs
       - ../services/blog-service/logs:/logs/blog-service:ro
-      # bookstore-service logs
       - ../services/bookstore-service/logs:/logs/bookstore-service:ro
-      # media-streaming-service logs
       - ../services/media-streaming-service/logs:/logs/media-streaming-service:ro
-      # notification-service logs
       - ../services/notification-service/logs:/logs/notification-service:ro
-      # platform-ops-service logs
       - ../services/platform-ops-service/logs:/logs/platform-ops-service:ro
-      # query-service logs
       - ../services/query-service/logs:/logs/query-service:ro
     depends_on:
       - elasticsearch
