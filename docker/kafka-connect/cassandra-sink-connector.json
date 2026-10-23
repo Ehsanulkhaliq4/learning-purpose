@@ -1,0 +1,13 @@
+{
+  "name": "cassandra-log-sink",
+  "config": {
+    "connector.class": "com.datastax.oss.kafka.sink.CassandraSinkConnector",
+    "tasks.max": "1",
+    "topics": "docker-logs",
+
+    "contactPoints": "cassandra",
+    "loadBalancing.localDc": "datacenter1",
+
+    "topic.docker-logs.logs.application_logs.mapping": "log_date=value.log_date, log_time=value.log_time, container_id=value.container_id, log_level=value.log_level, message=value.message, service_name=value.service_name"
+  }
+}

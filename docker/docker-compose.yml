@@ -137,16 +137,17 @@ services:
     volumes:
       - ./debezium/register-connectors.sh:/register-connectors.sh:ro
       - ./debezium/connectors:/connectors:ro
+      - ./kafka-connect:/kafka-connect:ro
     entrypoint: ["/bin/sh", "/register-connectors.sh"]
     restart: "no"
     networks:
       - learning-purpose-network
 
   # -------------------------------------------------------------
-  # Object Storage: MinIO (S3 Compatible API)
+  # Object Storage: MinIO (Community Fork: pgsty/minio)
   # -------------------------------------------------------------
   minio:
-    image: minio/minio:latest
+    image: pgsty/minio:latest  # ✅ FIXED: Community fork
     container_name: learning-purpose-minio
     command: server /data --console-address ":9001"
     ports:
@@ -159,13 +160,12 @@ services:
       - miniodata:/data
     networks:
       - learning-purpose-network
-    # REMOVED HEALTHCHECK (Use minio-init to wait instead)
 
   # -------------------------------------------------------------
-  # MinIO Bucket Initialization (Creates buckets automatically)
+  # MinIO Bucket Initialization
   # -------------------------------------------------------------
   minio-init:
-    image: minio/minio:latest  # CHANGED TO QUAY.IO
+    image: pgsty/mc:latest  # ✅ FIXED: Community fork
     container_name: learning-purpose-minio-init
     depends_on:
       minio:
@@ -185,7 +185,7 @@ services:
       - learning-purpose-network
 
   # -------------------------------------------------------------
-  # Local SMTP Server: Mailpit (Email Mock & Web UI)
+  # Local SMTP Server: Mailpit
   # -------------------------------------------------------------
   mailpit:
     image: axllent/mailpit:latest
@@ -233,7 +233,6 @@ services:
   # -------------------------------------------------------------
   # APPLICATION MICROSERVICES
   # -------------------------------------------------------------
-
   api-gateway:
     build:
       context: ../services/api-gateway
@@ -262,12 +261,14 @@ services:
     build:
       context: ../services/user-service
       dockerfile: Dockerfile
-    container_name: learning-purpose-user-service
+    container_name: user-service
     ports:
       - "8081:8081"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/user_db
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgrespassword
     depends_on:
       kafka:
         condition: service_healthy
@@ -282,12 +283,14 @@ services:
     build:
       context: ../services/exam-service
       dockerfile: Dockerfile
-    container_name: learning-purpose-exam-service
+    container_name: exam-service
     ports:
       - "8082:8082"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/exam_db
       - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgrespassword
     depends_on:
       kafka:
         condition: service_healthy
@@ -302,7 +305,7 @@ services:
     build:
       context: ../services/blog-service
       dockerfile: Dockerfile
-    container_name: learning-purpose-blog-service
+    container_name: blog-service
     ports:
       - "8084:8084"
     environment:
@@ -317,7 +320,7 @@ services:
       postgres:
         condition: service_healthy
       minio-init:
-        condition: service_completed_successfully # WAIT FOR BUCKETS
+        condition: service_completed_successfully
     networks:
       - learning-purpose-network
     volumes:
@@ -342,7 +345,7 @@ services:
       postgres:
         condition: service_healthy
       minio-init:
-        condition: service_completed_successfully # WAIT FOR BUCKETS
+        condition: service_completed_successfully
     networks:
       - learning-purpose-network
     volumes:
@@ -367,7 +370,7 @@ services:
       postgres:
         condition: service_healthy
       minio-init:
-        condition: service_completed_successfully # WAIT FOR BUCKETS
+        condition: service_completed_successfully
     networks:
       - learning-purpose-network
     volumes:
@@ -497,7 +500,7 @@ services:
       - learning-purpose-network
 
   # -------------------------------------------------------------
-  # Filebeat (Log shipper)
+  # Filebeat (Log shipper to Elasticsearch)
   # -------------------------------------------------------------
   filebeat:
     image: docker.elastic.co/beats/filebeat:8.15.3
@@ -522,6 +525,131 @@ services:
     networks:
       - learning-purpose-network
 
+  # -------------------------------------------------------------
+  # Apache Cassandra (Log Storage)
+  # -------------------------------------------------------------
+  cassandra:
+    image: cassandra:5.0
+    container_name: learning-purpose-cassandra
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=learning-purpose-cluster
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - MAX_HEAP_SIZE=1G
+      - HEAP_NEWSIZE=100M
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - learning-purpose-network
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe cluster' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # -------------------------------------------------------------
+  # Cassandra Schema Initialization (One-off container)
+  # -------------------------------------------------------------
+  cassandra-init:
+    image: cassandra:5.0
+    container_name: learning-purpose-cassandra-init
+    depends_on:
+      cassandra:
+        condition: service_healthy 
+    volumes:
+      - ./cassandra/cassandra-schema.cql:/schema.cql:ro 
+    command: /bin/sh -c "cqlsh cassandra -f /schema.cql" 
+    networks:
+      - learning-purpose-network
+    restart: "no"
+
+  # -------------------------------------------------------------
+  # Vector Log Collector (Sends logs to Kafka)
+  # -------------------------------------------------------------
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: learning-purpose-vector
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./vector/vector.toml:/etc/vector/vector.toml:ro
+    command: ["--config", "/etc/vector/vector.toml"]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - learning-purpose-network
+
+  # -------------------------------------------------------------
+  # Kafka Connect (Bridges Kafka -> Cassandra)
+  # -------------------------------------------------------------
+
+  kafka-connect-cassandra:
+    image: confluentinc/cp-kafka-connect:7.6.0
+    container_name: learning-purpose-kafka-connect-cassandra
+    ports:
+      - "8089:8083"
+    environment:
+      CONNECT_REST_ADVERTISED_HOST_NAME: "kafka-connect-cassandra"
+      CONNECT_BOOTSTRAP_SERVERS: "kafka:29092"
+      bootstrap.servers: "kafka:29092"
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: "cassandra-connect-cluster"
+      CONNECT_CONFIG_STORAGE_TOPIC: "cassandra-connect-configs"
+      CONNECT_OFFSET_STORAGE_TOPIC: "cassandra-connect-offsets"
+      CONNECT_STATUS_STORAGE_TOPIC: "cassandra-connect-statuses"
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_KEY_CONVERTER: "org.apache.kafka.connect.storage.StringConverter"
+      CONNECT_VALUE_CONVERTER: "org.apache.kafka.connect.json.JsonConverter"
+      CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      CONNECT_PLUGIN_PATH: "/usr/share/confluent-hub-components,/usr/share/java"
+    command: 
+      - bash 
+      - -c 
+      - |
+        echo "Installing Confluent Cassandra Connector..."
+        confluent-hub install --no-prompt confluentinc/kafka-connect-cassandra:latest
+        echo "Starting Kafka Connect..."
+        /etc/confluent/docker/run
+    depends_on:
+      kafka:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/connectors"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    networks:
+      - learning-purpose-network
+
+  # -------------------------------------------------------------
+  # Dozzle - Real-time Docker Log Viewer
+  # -------------------------------------------------------------
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: learning-purpose-dozzle
+    ports:
+      - "9999:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro 
+      - dozzle_data:/data 
+    environment:
+      - DOZZLE_USERNAME=admin
+      - DOZZLE_PASSWORD=admin
+      - DOZZLE_ENABLE_ACTIONS=true
+      - DOZZLE_ENABLE_SHELL=true
+    networks:
+      - learning-purpose-network
+    restart: unless-stopped
+
 networks:
   learning-purpose-network:
     driver: bridge
@@ -534,3 +662,5 @@ volumes:
   pgadmindata:
   elasticsearch-data:
   m2_cache:
+  cassandra_data:
+  dozzle_data:

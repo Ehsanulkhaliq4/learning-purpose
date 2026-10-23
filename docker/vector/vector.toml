@@ -1,0 +1,20 @@
+[sources.docker_logs]
+type = "docker_logs"
+docker_host = "unix:///var/run/docker.sock"
+exclude_containers = ["learning-purpose-vector", "learning-purpose-cassandra", "learning-purpose-cassandra-init", "learning-purpose-kafka-connect-cassandra"]
+
+[transforms.parse_logs]
+type = "remap"
+inputs = ["docker_logs"]
+source = '''
+  .log_time = now()
+  .service_name = .container_name
+  .log_level = if contains(string!(.message), "ERROR") { "ERROR" } else { "INFO" }
+'''
+
+[sinks.kafka_logs]
+type = "kafka"
+inputs = ["parse_logs"]
+bootstrap_servers = "kafka:29092"
+topic = "docker-logs"
+encoding.codec = "json"
