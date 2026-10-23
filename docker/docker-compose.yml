@@ -588,7 +588,10 @@ services:
   # -------------------------------------------------------------
 
   kafka-connect-cassandra:
-    image: confluentinc/cp-kafka-connect:7.6.0
+    build:
+      context: .
+      dockerfile: Dockerfile.kafka-connect-cassandra
+    image: learning-purpose-kafka-connect-cassandra:local
     container_name: learning-purpose-kafka-connect-cassandra
     ports:
       - "8089:8083"

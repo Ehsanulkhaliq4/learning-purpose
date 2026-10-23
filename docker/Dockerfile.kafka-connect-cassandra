@@ -1,0 +1,25 @@
+
+FROM maven:3.9-eclipse-temurin-17 AS connector-build
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN git clone --depth 1 --branch 1.7.6 \
+    https://github.com/datastax/kafka-sink.git /src
+
+WORKDIR /src
+
+RUN mvn -DskipTests clean package
+
+FROM confluentinc/cp-kafka-connect:7.6.0
+
+USER root
+
+RUN mkdir -p /usr/share/confluent-hub-components/datastax-kafka-sink
+
+COPY --from=connector-build \
+    /src/dist/target/kafka-connect-cassandra-sink-1.7.6.jar \
+    /usr/share/confluent-hub-components/datastax-kafka-sink/
+
+USER appuser
