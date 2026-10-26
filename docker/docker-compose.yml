@@ -147,7 +147,7 @@ services:
   # Object Storage: MinIO (Community Fork: pgsty/minio)
   # -------------------------------------------------------------
   minio:
-    image: pgsty/minio:latest  # ✅ FIXED: Community fork
+    image: pgsty/minio:latest 
     container_name: learning-purpose-minio
     command: server /data --console-address ":9001"
     ports:
@@ -421,11 +421,17 @@ services:
       - MAIL_HOST=mailpit
       - MINIO_ENDPOINT=http://minio:9000
       - MAILPIT_URL=http://mailpit:8025
+      - SPRING_CASSANDRA_CONTACT_POINTS=cassandra
+      - SPRING_CASSANDRA_PORT=9042
+      - SPRING_CASSANDRA_KEYSPACE_NAME=logs
+      - SPRING_CASSANDRA_LOCAL_DATACENTER=datacenter1
     depends_on:
       postgres: 
         condition: service_healthy
       kafka: 
         condition: service_healthy 
+      cassandra:
+        condition: service_healthy
     networks: 
         - learning-purpose-network
     volumes:
@@ -630,6 +636,25 @@ services:
       timeout: 5s
       retries: 10
       start_period: 40s
+    networks:
+      - learning-purpose-network
+
+  # -------------------------------------------------------------
+  # Cassandra Sink Connector Auto-Registration (One-off)
+  # -------------------------------------------------------------
+  cassandra-sink-init:
+    image: curlimages/curl:latest
+    container_name: learning-purpose-cassandra-sink-init
+    depends_on:
+      kafka-connect-cassandra:
+        condition: service_healthy
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./cassandra-connect/register-connector.sh:/register-connector.sh:ro
+      - ./cassandra-connect/cassandra-sink-config.json:/cassandra-sink-config.json:ro
+    entrypoint: ["/bin/sh", "/register-connector.sh"]
+    restart: "no"
     networks:
       - learning-purpose-network
 

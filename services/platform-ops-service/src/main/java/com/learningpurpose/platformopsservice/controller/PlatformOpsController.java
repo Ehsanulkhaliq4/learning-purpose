@@ -1,16 +1,19 @@
 package com.learningpurpose.platformopsservice.controller;
 
+import com.learningpurpose.platformopsservice.dto.ApplicationLogDto;
 import com.learningpurpose.platformopsservice.dto.ColumnDefinition;
 import com.learningpurpose.platformopsservice.dto.DdlResult;
 import com.learningpurpose.platformopsservice.dto.TablePage;
 import com.learningpurpose.platformopsservice.service.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +28,7 @@ public class PlatformOpsController {
     private final MailOpsService mailOpsService;
     private final UserDirectoryService userDirectoryService;
     private final MailpitInboxService mailpitInboxService;
+    private final ApplicationLogService applicationLogService;
 
     /* ── Kafka ── */
     @GetMapping("/kafka/topics")
@@ -160,5 +164,14 @@ public class PlatformOpsController {
     public ResponseEntity<Void> purgeInbox() {
         mailpitInboxService.purgeInbox();
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/logs")
+    public List<ApplicationLogDto> getLogs(@RequestParam@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false)
+            String serviceName,
+            @RequestParam(required = false)
+            String logLevel) {
+        return applicationLogService.getLogs(date, serviceName, logLevel);
     }
 }

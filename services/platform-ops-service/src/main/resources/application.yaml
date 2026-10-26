@@ -22,6 +22,12 @@ spring:
       mail.smtp.connectiontimeout: 5000
       mail.smtp.timeout: 5000
       mail.smtp.writetimeout: 5000
+  cassandra:
+    contact-points: ${CASSANDRA_CONTACT_POINTS:localhost}
+    port: ${CASSANDRA_PORT:9042}
+    local-datacenter: ${CASSANDRA_DATACENTER:datacenter1}
+    keyspace-name: logs
+    schema-action: none
 
 # Databases this ops service is allowed to manage.
 # Add any new microservice DB here.

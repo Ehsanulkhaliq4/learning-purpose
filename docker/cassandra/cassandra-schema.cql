@@ -11,4 +11,5 @@ CREATE TABLE IF NOT EXISTS application_logs (
     message text,
     container_id text,
     PRIMARY KEY ((log_date), log_time)
-) WITH CLUSTERING ORDER BY (log_time DESC);
+) WITH CLUSTERING ORDER BY (log_time DESC)
+  AND default_time_to_live = 2592000;   -- 30 days

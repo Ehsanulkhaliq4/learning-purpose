@@ -7,7 +7,12 @@ exclude_containers = ["learning-purpose-vector", "learning-purpose-cassandra", "
 type = "remap"
 inputs = ["docker_logs"]
 source = '''
-  .log_time = now()
+  # Use the original Docker timestamp, not "now"
+  .log_time = .timestamp
+
+  # Derive the date component required by the Cassandra partition key
+  .log_date = format_timestamp!(.timestamp, format: "%Y-%m-%d")
+
   .service_name = .container_name
   .log_level = if contains(string!(.message), "ERROR") { "ERROR" } else { "INFO" }
 '''
