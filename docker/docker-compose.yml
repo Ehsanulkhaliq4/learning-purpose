@@ -178,6 +178,8 @@ services:
       mc mb --ignore-existing myminio/learning-purpose-blogs;
       mc mb --ignore-existing myminio/learning-purpose-books;
       mc mb --ignore-existing myminio/media-stream-bucket;
+      mc anonymous set download myminio/learning-purpose-blogs;
+      mc anonymous set download myminio/learning-purpose-books;
       echo 'Buckets created successfully!';
       exit 0;
       "
