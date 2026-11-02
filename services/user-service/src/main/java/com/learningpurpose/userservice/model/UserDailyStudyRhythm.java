@@ -30,4 +30,17 @@ public class UserDailyStudyRhythm {
 
     @Column(name = "hours_spent", nullable = false, precision = 4, scale = 2)
     private BigDecimal hoursSpent;
+
+    @Column(name = "created_at", updatable = false)
+    private java.time.Instant createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        if (createdAt == null) {
+            createdAt = java.time.Instant.now();
+        }
+        if (hoursSpent == null) {
+            hoursSpent = BigDecimal.ZERO;
+        }
+    }
 }

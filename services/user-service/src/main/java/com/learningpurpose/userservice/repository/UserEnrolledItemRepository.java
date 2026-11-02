@@ -4,7 +4,9 @@ import com.learningpurpose.userservice.model.UserEnrolledItem;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserEnrolledItemRepository extends JpaRepository<UserEnrolledItem, Long> {
     List<UserEnrolledItem> findByUserIdOrderByUpdatedAtDesc(Long userId, Pageable pageable);
+    Optional<UserEnrolledItem> findByUserIdAndItemTypeAndReferenceId(Long userId, String itemType, Long referenceId);
 }

@@ -25,7 +25,11 @@ public class CorsConfig {
                 "Range",
                 "Origin",
                 "X-Requested-With",
-                "Cache-Control"
+                "Cache-Control",
+                "Pragma",
+                "Expires",
+                "X-Authenticated-User",
+                "X-Authenticated-Role"
         ));
         corsConfig.setExposedHeaders(Arrays.asList(
                 "Content-Range",
