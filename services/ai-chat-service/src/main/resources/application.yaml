@@ -10,24 +10,36 @@ spring:
         api-key: ${GCP_GENAI_API_KEY:}
         chat:
           options:
-            model: gemini-2.0-flash          # or gemini-1.5-flash
-            temperature: 0.4
+            model: gemini-3.8-flash          # or gemini-1.5-flash
+            temperature: 2.0
             top-p: 0.95
             top-k: 40
-#  ai:
-#    vertex:
-#      ai:
-#        gemini:
-#          project-id: ${GCP_PROJECT_ID:learning-purpose-prod}
-#          location: ${GCP_LOCATION:us-central1}
-#          chat:
-#            options:
-#              model: gemini-2.5-flash
-#              temperature: 0.4
-#              top-p: 0.95
-#              top-k: 40
-
+  r2dbc:
+    url: ${SPRING_REACTOR_R2DBC_URL:r2dbc:postgresql://localhost:5432/ai_chat_db}
+    username: postgres
+    password: postgrespassword
+    pool:
+      initial-size: 5
+      max-size: 20
+      max-idle-time: 30m
+  cassandra:
+    contact-points: cassandra
+    port: 9042
+    local-datacenter: datacenter1
+    keyspace-name: chat
+    schema-action: NONE
+    request:
+      consistency: LOCAL_QUORUM
+      timeout: 10s
 
 app:
   services:
     exam-service-url: ${EXAM_SERVICE_URL:http://localhost:8082}
+  chat:
+    flyway:
+      jdbc-url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ai_chat_db}
+      username: postgres
+      password: postgrespassword
+    message:
+      page-size: 50
+      max-content-length: 10000

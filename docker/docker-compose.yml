@@ -404,9 +404,15 @@ services:
     ports: 
       - "8087:8087"
     environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ai_chat_db
+      - SPRING_REACTOR_R2DBC_URL=r2dbc:postgresql://postgres:5432/ai_chat_db
       - EXAM_SERVICE_URL=http://exam-service:8082
     networks:
       - learning-purpose-network
+    depends_on:
+      cassandra:
+        condition: service_healthy    
+    restart: on-failure                 
     volumes:
       - m2_cache:/root/.m2
 

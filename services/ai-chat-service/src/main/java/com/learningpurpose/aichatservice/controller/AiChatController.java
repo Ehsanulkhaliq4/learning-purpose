@@ -12,7 +12,6 @@ import reactor.core.publisher.Flux;
 @RestController
 @RequestMapping("/api/v1/chat")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Slf4j
 public class AiChatController {
 
