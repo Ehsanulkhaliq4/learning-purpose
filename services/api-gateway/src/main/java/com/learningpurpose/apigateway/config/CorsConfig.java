@@ -29,7 +29,8 @@ public class CorsConfig {
                 "Pragma",
                 "Expires",
                 "X-Authenticated-User",
-                "X-Authenticated-Role"
+                "X-Authenticated-Role",
+                "x-user-id"
         ));
         corsConfig.setExposedHeaders(Arrays.asList(
                 "Content-Range",

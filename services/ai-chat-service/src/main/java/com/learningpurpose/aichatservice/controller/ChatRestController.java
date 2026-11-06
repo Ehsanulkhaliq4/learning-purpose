@@ -7,6 +7,7 @@ import com.learningpurpose.aichatservice.exception.ForbiddenException;
 import com.learningpurpose.aichatservice.repository.postgres.ChatMemberRepository;
 import com.learningpurpose.aichatservice.repository.postgres.ConversationRepository;
 import com.learningpurpose.aichatservice.service.ChatService;
+import com.learningpurpose.aichatservice.service.DmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -20,6 +21,7 @@ import java.util.UUID;
 public class ChatRestController {
 
     private final ChatService              chatService;
+    private final DmService                dmService;
     private final ChatMemberRepository     memberRepo;
     private final ConversationRepository   conversationRepo;
 
@@ -45,7 +47,8 @@ public class ChatRestController {
     private Mono<ChatMember> requireActive(UUID cid, Long uid) {
         return memberRepo.findByConversationIdAndUserId(cid, uid)
                 .filter(m -> "active".equals(m.getStatus()))
-                .switchIfEmpty(Mono.error(new ForbiddenException("Not a member")));
+                .switchIfEmpty(Mono.defer(() -> dmService.ensureCreatorMembership(cid, uid)
+                        .switchIfEmpty(Mono.error(new ForbiddenException("Not a member")))));
     }
 
     public record ConversationWithMeta(Conversation conversation,

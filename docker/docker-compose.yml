@@ -468,17 +468,17 @@ services:
   # -------------------------------------------------------------
   # FRONTEND: Angular Application
   # -------------------------------------------------------------
-  frontend:
-    build:
-      context: ../frontend/learning-purpose-ui
-      dockerfile: Dockerfile
-    container_name: learning-purpose-frontend
-    ports:
-      - "4200:80"
-    depends_on:
-      - api-gateway
-    networks:
-      - learning-purpose-network
+  # frontend:
+  #   build:
+  #     context: ../frontend/learning-purpose-ui
+  #     dockerfile: Dockerfile
+  #   container_name: learning-purpose-frontend
+  #   ports:
+  #     - "4200:80"
+  #   depends_on:
+  #     - api-gateway
+  #   networks:
+  #     - learning-purpose-network
 
   # -------------------------------------------------------------
   # Elasticsearch (Logs)

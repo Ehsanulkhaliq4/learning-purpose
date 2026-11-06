@@ -3,6 +3,7 @@ package com.learningpurpose.aichatservice.service.impl;
 import com.learningpurpose.aichatservice.entity.postgres.ChatMember;
 import com.learningpurpose.aichatservice.entity.postgres.Conversation;
 import com.learningpurpose.aichatservice.entity.postgres.DmPair;
+import com.learningpurpose.aichatservice.exception.ForbiddenException;
 import com.learningpurpose.aichatservice.repository.postgres.ChatMemberRepository;
 import com.learningpurpose.aichatservice.repository.postgres.ConversationRepository;
 import com.learningpurpose.aichatservice.repository.postgres.DmPairRepository;
@@ -31,8 +32,52 @@ public class DmServiceImpl implements DmService {
             return Mono.error(new IllegalArgumentException("Cannot DM yourself"));
         }
         return dmPairRepo.findBetween(a, b)
-                .flatMap(p -> conversationRepo.findById(p.getConversationId()))
+                .flatMap(p -> conversationRepo.findById(p.getConversationId())
+                        .flatMap(conversation -> ensureActiveMember(conversation.getId(), a)
+                                .thenReturn(conversation)))
                 .switchIfEmpty(Mono.defer(() -> createNew(a, b)));
+    }
+
+    @Override
+    public Mono<ChatMember> ensureCreatorMembership(java.util.UUID cid, Long uid) {
+        return conversationRepo.findById(cid)
+                .filter(conversation -> "dm".equalsIgnoreCase(conversation.getType())
+                        && uid.equals(conversation.getCreatedBy()))
+                .flatMap(conversation -> memberRepo.findByConversationIdAndStatus(cid, "active")
+                        .filter(member -> !uid.equals(member.getUserId()))
+                        .hasElements()
+                        .filter(Boolean::booleanValue)
+                        .flatMap(hasActivePeer -> memberRepo.findByConversationIdAndUserId(cid, uid)
+                                .flatMap(member -> {
+                                    if ("active".equals(member.getStatus())) {
+                                        return Mono.just(member);
+                                    }
+                                    if ("left".equals(member.getStatus())) {
+                                        member.setStatus("active");
+                                        member.setJoinedAt(Instant.now());
+                                        member.setLeftAt(null);
+                                        return memberRepo.save(member);
+                                    }
+                                    return Mono.error(new ForbiddenException("Not an active member"));
+                                })
+                                .switchIfEmpty(Mono.defer(() -> addMember(cid, uid)))));
+    }
+
+    private Mono<ChatMember> ensureActiveMember(java.util.UUID cid, Long uid) {
+        return memberRepo.findByConversationIdAndUserId(cid, uid)
+                .flatMap(member -> {
+                    if ("active".equals(member.getStatus())) {
+                        return Mono.just(member);
+                    }
+                    if ("left".equals(member.getStatus())) {
+                        member.setStatus("active");
+                        member.setJoinedAt(Instant.now());
+                        member.setLeftAt(null);
+                        return memberRepo.save(member);
+                    }
+                    return Mono.error(new ForbiddenException("Not an active member"));
+                })
+                .switchIfEmpty(Mono.defer(() -> addMember(cid, uid)));
     }
 
     private Mono<Conversation> createNew(Long a, Long b) {
