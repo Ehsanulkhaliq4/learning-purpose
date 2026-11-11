@@ -1,6 +1,5 @@
 package com.learningpurpose.aichatservice.service.impl;
 
-import com.google.api.client.util.Value;
 import com.learningpurpose.aichatservice.dto.ClientMessage;
 import com.learningpurpose.aichatservice.dto.ServerMessage;
 import com.learningpurpose.aichatservice.entity.cassandra.ChatMessage;
@@ -13,6 +12,7 @@ import com.learningpurpose.aichatservice.websocket.SessionRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

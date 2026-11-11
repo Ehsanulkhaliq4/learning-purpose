@@ -4,6 +4,7 @@ import com.learningpurpose.aichatservice.entity.cassandra.ChatMessage;
 import com.learningpurpose.aichatservice.entity.postgres.ChatMember;
 import com.learningpurpose.aichatservice.entity.postgres.Conversation;
 import com.learningpurpose.aichatservice.exception.ForbiddenException;
+import com.learningpurpose.aichatservice.exception.NotFoundException;
 import com.learningpurpose.aichatservice.repository.postgres.ChatMemberRepository;
 import com.learningpurpose.aichatservice.repository.postgres.ConversationRepository;
 import com.learningpurpose.aichatservice.service.ChatService;
@@ -40,18 +41,31 @@ public class ChatRestController {
     public Flux<ConversationWithMeta> myConversations(@RequestHeader("X-User-Id") Long me) {
         return memberRepo.findByUserIdAndStatus(me, "active")
                 .flatMap(member -> conversationRepo.findById(member.getConversationId())
-                        .map(c -> new ConversationWithMeta(c, member.getUnreadCount(),
-                                member.getLastReadMessageId())));
+                        .flatMap(conversation -> {
+                            if (!"dm".equalsIgnoreCase(conversation.getType())) {
+                                return Mono.just(new ConversationWithMeta(conversation,
+                                        member.getUnreadCount(), member.getLastReadMessageId(), null));
+                            }
+                            return memberRepo.findActiveUserIdsExcept(conversation.getId(), me)
+                                    .collectList()
+                                    .map(userIds -> new ConversationWithMeta(conversation,
+                                            member.getUnreadCount(), member.getLastReadMessageId(),
+                                            userIds.size() == 1 ? userIds.get(0) : null));
+                        }));
     }
 
     private Mono<ChatMember> requireActive(UUID cid, Long uid) {
         return memberRepo.findByConversationIdAndUserId(cid, uid)
                 .filter(m -> "active".equals(m.getStatus()))
-                .switchIfEmpty(Mono.defer(() -> dmService.ensureCreatorMembership(cid, uid)
-                        .switchIfEmpty(Mono.error(new ForbiddenException("Not a member")))));
+                .switchIfEmpty(Mono.defer(() -> dmService.ensureCreatorMembership(cid, uid)))
+                .switchIfEmpty(Mono.defer(() -> conversationRepo.existsById(cid)
+                        .flatMap(exists -> exists
+                                ? Mono.<ChatMember>error(new ForbiddenException("Not a member"))
+                                : Mono.<ChatMember>error(new NotFoundException("Conversation not found")))));
     }
 
     public record ConversationWithMeta(Conversation conversation,
                                        Integer unreadCount,
-                                       UUID lastReadMessageId) {}
+                                       UUID lastReadMessageId,
+                                       Long otherParticipantId) {}
 }

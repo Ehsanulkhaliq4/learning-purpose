@@ -145,6 +145,47 @@ class DmServiceImplTest {
         verify(memberRepo, never()).save(any(ChatMember.class));
     }
 
+    @Test
+    void createsNewDmWhenPairDoesNotExist() {
+        Conversation savedConversation = Conversation.builder()
+                .id(CONVERSATION_ID)
+                .type("dm")
+                .createdBy(USER_ID)
+                .build();
+
+        when(dmPairRepo.findBetween(USER_ID, OTHER_USER_ID)).thenReturn(Mono.empty());
+        when(conversationRepo.save(any(Conversation.class))).thenReturn(Mono.just(savedConversation));
+        when(memberRepo.save(any(ChatMember.class))).thenAnswer(invocation ->
+                Mono.just(invocation.getArgument(0)));
+        when(dmPairRepo.save(any(DmPair.class))).thenAnswer(invocation ->
+                Mono.just(invocation.getArgument(0)));
+
+        StepVerifier.create(service.getOrCreate(USER_ID, OTHER_USER_ID))
+                .expectNext(savedConversation)
+                .verifyComplete();
+
+        ArgumentCaptor<Conversation> convCaptor = ArgumentCaptor.forClass(Conversation.class);
+        verify(conversationRepo).save(convCaptor.capture());
+        assertNull(convCaptor.getValue().getId(), "New conversation must have null ID for database generation");
+        assertEquals("dm", convCaptor.getValue().getType());
+        assertEquals(USER_ID, convCaptor.getValue().getCreatedBy());
+
+        ArgumentCaptor<ChatMember> memberCaptor = ArgumentCaptor.forClass(ChatMember.class);
+        verify(memberRepo, times(2)).save(memberCaptor.capture());
+        for (ChatMember member : memberCaptor.getAllValues()) {
+            assertNull(member.getId(), "New chat member must have null ID for database generation");
+            assertEquals(CONVERSATION_ID, member.getConversationId());
+            assertEquals("active", member.getStatus());
+        }
+
+        ArgumentCaptor<DmPair> pairCaptor = ArgumentCaptor.forClass(DmPair.class);
+        verify(dmPairRepo).save(pairCaptor.capture());
+        assertNull(pairCaptor.getValue().getId(), "New DM pair must have null ID for database generation");
+        assertEquals(CONVERSATION_ID, pairCaptor.getValue().getConversationId());
+        assertEquals(Math.min(USER_ID, OTHER_USER_ID), pairCaptor.getValue().getUserAId());
+        assertEquals(Math.max(USER_ID, OTHER_USER_ID), pairCaptor.getValue().getUserBId());
+    }
+
     private void stubExistingConversation(Conversation conversation) {
         DmPair pair = DmPair.builder().conversationId(CONVERSATION_ID).build();
         when(dmPairRepo.findBetween(USER_ID, OTHER_USER_ID)).thenReturn(Mono.just(pair));

@@ -31,7 +31,7 @@ public class GroupServiceImpl implements GroupService {
     public Mono<Conversation> create(Long creatorId, String name, String description, String visibility) {
         Instant now = Instant.now();
         Conversation c = Conversation.builder()
-                .id(Ids.uuid()).type("group").name(name)
+                .type("group").name(name)
                 .description(description).visibility(visibility)
                 .inviteCode(Ids.inviteCode()).createdBy(creatorId)
                 .createdAt(now).updatedAt(now).build();
@@ -92,7 +92,7 @@ public class GroupServiceImpl implements GroupService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Group not found")))
                 .flatMap(group -> {
                     Invite inv = Invite.builder()
-                            .id(Ids.uuid()).type("group").conversationId(groupId)
+                            .type("group").conversationId(groupId)
                             .inviterId(inviterId).inviteeId(inviteeId)
                             .status("pending").createdAt(Instant.now())
                             .expiresAt(Instant.now().plusSeconds(7 * 86400))
@@ -127,7 +127,7 @@ public class GroupServiceImpl implements GroupService {
     // ─────────────────────────── Helpers ───────────────────────────
     private Mono<ChatMember> addMember(UUID cid, Long uid, String role, String status) {
         return memberRepo.save(ChatMember.builder()
-                .id(Ids.uuid()).conversationId(cid).userId(uid)
+                .conversationId(cid).userId(uid)
                 .role(role).status(status)
                 .joinedAt("active".equals(status) ? Instant.now() : null)
                 .unreadCount(0).build());

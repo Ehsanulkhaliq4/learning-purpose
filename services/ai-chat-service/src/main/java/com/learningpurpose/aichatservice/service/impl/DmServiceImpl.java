@@ -8,7 +8,6 @@ import com.learningpurpose.aichatservice.repository.postgres.ChatMemberRepositor
 import com.learningpurpose.aichatservice.repository.postgres.ConversationRepository;
 import com.learningpurpose.aichatservice.repository.postgres.DmPairRepository;
 import com.learningpurpose.aichatservice.service.DmService;
-import com.learningpurpose.aichatservice.util.Ids;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,7 +82,7 @@ public class DmServiceImpl implements DmService {
     private Mono<Conversation> createNew(Long a, Long b) {
         Instant now = Instant.now();
         Conversation c = Conversation.builder()
-                .id(Ids.uuid()).type("dm").createdBy(a)
+                .type("dm").createdBy(a)
                 .createdAt(now).updatedAt(now).build();
 
         return conversationRepo.save(c)
@@ -95,7 +94,7 @@ public class DmServiceImpl implements DmService {
 
     private Mono<ChatMember> addMember(java.util.UUID cid, Long uid) {
         return memberRepo.save(ChatMember.builder()
-                .id(Ids.uuid()).conversationId(cid).userId(uid)
+                .conversationId(cid).userId(uid)
                 .role("member").status("active").joinedAt(Instant.now())
                 .unreadCount(0).build());
     }
@@ -104,7 +103,7 @@ public class DmServiceImpl implements DmService {
         Long lo = Math.min(a, b);
         Long hi = Math.max(a, b);
         return dmPairRepo.save(DmPair.builder()
-                .id(Ids.uuid()).userAId(lo).userBId(hi)
+                .userAId(lo).userBId(hi)
                 .conversationId(cid).createdAt(now).build());
     }
 }
