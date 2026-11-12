@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface UserActivityLogRepository extends JpaRepository<UserActivityLog, Long> {
     List<UserActivityLog> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+    long countByUserIdAndActionType(Long userId, String actionType);
+    List<UserActivityLog> findTop10ByUserIdAndActionTypeOrderByCreatedAtDesc(Long userId, String actionType);
 }

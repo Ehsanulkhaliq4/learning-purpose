@@ -46,7 +46,7 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean enabled = true;
 
-    @Column(length = 500)
+    @Column(columnDefinition = "TEXT")
     private String profile;
 
     @Column(name = "created_at", updatable = false)

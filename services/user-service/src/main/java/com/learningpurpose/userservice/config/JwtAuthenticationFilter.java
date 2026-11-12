@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     UserDetails userDetails = this.userRepository.findByUsername(username).orElse(null);
 
-                    if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
+                    if (userDetails != null && userDetails.isEnabled() && jwtService.isTokenValid(jwt, userDetails)) {
                         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                                 userDetails,
                                 null,
@@ -56,7 +56,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } else if (gatewayUser != null && !gatewayUser.isBlank() && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userRepository.findByUsername(gatewayUser.trim()).orElse(null);
-            if (userDetails != null) {
+            if (userDetails != null && userDetails.isEnabled()) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
                         null,
