@@ -67,14 +67,15 @@
         </section>
         <section class="friend-chat-promo" aria-labelledby="friend-chat-title">
           <div class="friend-chat-topline">
-            <span class="friend-chat-label"><span class="friend-chat-dot" aria-hidden="true"></span>Coming soon</span>
-            <span class="friend-chat-mark" aria-hidden="true">SOON</span>
+            <span class="friend-chat-label"><span class="friend-chat-dot" aria-hidden="true"></span>Direct messaging is live</span>
+            <span class="friend-chat-mark" aria-label="Live">LIVE</span>
           </div>
           <div class="friend-chat-content">
-            <p class="eyebrow">Learn together</p>
-            <h2 id="friend-chat-title">Chat with your friends.</h2>
-            <p>Keep the conversation going, share ideas, and encourage each other along the way.</p>
-            <p class="friend-chat-notice" role="status">Friend chat is on its way. We'll announce when it's ready.</p>
+            <p class="eyebrow">Stay connected</p>
+            <h2 id="friend-chat-title">Your conversations, all in one place.</h2>
+            <p>Send a direct message, pick up a conversation, and keep learning together.</p>
+            <a routerLink="/chat" class="friend-chat-action">Open messages <span aria-hidden="true">&#8594;</span></a>
+            <p class="friend-chat-notice" role="status"><strong>Up next</strong> Group discussions are in progress.</p>
           </div>
         </section>
         <div class="quote-card">
@@ -88,7 +89,7 @@
         @if (errorMessage()) { <div class="state-panel error" role="alert">{{ errorMessage() }}</div> }
         @if (isLoading()) { <div class="state-panel">Loading the latest stories...</div> }
         @else if (posts().length === 0 && !errorMessage()) { <div class="state-panel">No stories have been published yet.</div> }
-        @else { <div class="story-grid">@for (post of posts(); track post.id) { <article class="story-card"><div class="card-topline"><span>{{ post.tags[0] || 'Learning' }}</span><span>{{ post.createdAt | date:'mediumDate' }}</span></div><h3>{{ post.name }}</h3><p>{{ post.content }}</p><div class="card-footer"><span>By {{ post.postedBy }}</span><a [routerLink]="authService.isAuthenticated() ? ['/explore', post.id] : null" (click)="handleRead($event, post.id)" aria-label="Read {{ post.name }}">Read story <span aria-hidden="true">&#8594;</span></a></div></article> }</div> }
+        @else { <div class="story-grid">@for (post of posts(); track post.id) { <article class="story-card"><div class="card-topline"><span>{{ post.tags[0] || 'Learning' }}</span><span>{{ post.createdAt | date:'mediumDate' }}</span></div><h3>{{ post.name }}</h3><p>{{ post.content }}</p><div class="card-footer"><span>By {{ post.postedBy }}</span><a [routerLink]="authService.isAuthenticated() ? ['/explore', post.id] : null" (click)="handleRead($event)" aria-label="Read {{ post.name }}">Read story <span aria-hidden="true">&#8594;</span></a></div></article> }</div> }
       </section>
 
       <aside class="side-column right-column" aria-label="Learning resources">
@@ -153,7 +154,7 @@
         <div class="join-card">
           <p class="eyebrow">Your learning space</p>
           <h2>Make every idea count.</h2>
-          <a routerLink="/auth/register" class="join-action">Join the community</a>
+          <button type="button" class="join-action" (click)="authDialogService.open('register')">Join the community</button>
         </div>
         <section class="conference-promo" aria-labelledby="conference-promo-title">
           <div class="conference-promo-top">
@@ -168,7 +169,7 @@
               <li><span class="conference-feature-mark" aria-hidden="true">SH</span> Screen sharing</li>
               <li><span class="conference-feature-mark" aria-hidden="true">CC</span> Captions and chat</li>
             </ul>
-            <a routerLink="/conference" class="conference-promo-action">Start or join a meeting <span aria-hidden="true">&#8594;</span></a>
+            <button type="button" (click)="openConference()" class="conference-promo-action">Start or join a meeting <span aria-hidden="true">&#8594;</span></button>
           </div>
         </section>
       </aside>
