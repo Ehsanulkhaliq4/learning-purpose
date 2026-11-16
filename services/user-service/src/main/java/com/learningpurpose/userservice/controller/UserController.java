@@ -2,6 +2,8 @@ package com.learningpurpose.userservice.controller;
 
 import com.learningpurpose.userservice.dto.UpdateUserProfileRequest;
 import com.learningpurpose.userservice.dto.UserProfileDto;
+import com.learningpurpose.userservice.dto.AdminAccountStatusRequest;
+import com.learningpurpose.userservice.dto.AdminManagedUserDto;
 import com.learningpurpose.userservice.model.User;
 import com.learningpurpose.userservice.service.UserService;
 import jakarta.validation.Valid;
@@ -69,6 +71,25 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/admin/managed")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<List<AdminManagedUserDto>> getAdminManagedUsers() {
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(userService.getAdminManagedUsers());
+    }
+
+    @PutMapping("/admin/managed/{userId}/status")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<AdminManagedUserDto> updateManagedAccountStatus(
+            @PathVariable Long userId,
+            @Valid @RequestBody AdminAccountStatusRequest request
+    ) {
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.noStore())
+                .body(userService.updateManagedAccountStatus(userId, request));
     }
 
     public record UserSummary(Long id, String username, String firstName, String lastName) {

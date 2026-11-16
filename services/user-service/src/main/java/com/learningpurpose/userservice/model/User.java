@@ -46,6 +46,9 @@ public class User implements UserDetails {
     @Builder.Default
     private boolean enabled = true;
 
+    @Column(name = "deactivated_until")
+    private Instant deactivatedUntil;
+
     @Column(columnDefinition = "TEXT")
     private String profile;
 

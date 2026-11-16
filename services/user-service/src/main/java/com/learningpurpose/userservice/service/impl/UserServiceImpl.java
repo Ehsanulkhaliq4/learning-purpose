@@ -3,6 +3,8 @@ package com.learningpurpose.userservice.service.impl;
 import com.learningpurpose.userservice.dto.UpdateUserProfileRequest;
 import com.learningpurpose.userservice.dto.UserProfileDto;
 import com.learningpurpose.userservice.dto.UserProfileDto.QuizActivityDto;
+import com.learningpurpose.userservice.dto.AdminAccountStatusRequest;
+import com.learningpurpose.userservice.dto.AdminManagedUserDto;
 import com.learningpurpose.userservice.exception.UserAlreadyExistsException;
 import com.learningpurpose.userservice.model.User;
 import com.learningpurpose.userservice.model.UserActivityLog;
@@ -17,6 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 
@@ -80,7 +84,56 @@ public class UserServiceImpl implements UserService {
     public void deactivateMyAccount(String username) {
         User user = getAccount(username);
         user.setEnabled(false);
+        user.setDeactivatedUntil(null);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminManagedUserDto> getAdminManagedUsers() {
+        return userRepository.findAllNonAdminUsers().stream()
+                .map(AdminManagedUserDto::from)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public AdminManagedUserDto updateManagedAccountStatus(
+            Long userId,
+            AdminAccountStatusRequest request
+    ) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+
+        if (user.getRoles().stream().anyMatch(role -> "ROLE_ADMIN".equals(role.getRoleName()))) {
+            throw new IllegalArgumentException("Administrator accounts cannot be managed here.");
+        }
+
+        if (request.active()) {
+            user.setEnabled(true);
+            user.setDeactivatedUntil(null);
+        } else {
+            if (request.period() == null) {
+                throw new IllegalArgumentException("Choose a deactivation period.");
+            }
+
+            Instant now = Instant.now();
+            Instant reactivatesAt = switch (request.period()) {
+                case FIFTEEN_DAYS -> now.plus(Duration.ofDays(15));
+                case THIRTY_DAYS -> now.plus(Duration.ofDays(30));
+                case PERMANENT -> null;
+                case CUSTOM -> {
+                    if (request.reactivatesAt() == null || !request.reactivatesAt().isAfter(now)) {
+                        throw new IllegalArgumentException("Custom reactivation time must be in the future.");
+                    }
+                    yield request.reactivatesAt();
+                }
+            };
+            user.setEnabled(false);
+            user.setDeactivatedUntil(reactivatesAt);
+        }
+
+        return AdminManagedUserDto.from(userRepository.save(user));
     }
 
     private User getAccount(String username) {

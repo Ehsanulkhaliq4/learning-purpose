@@ -12,6 +12,7 @@ public interface QuizService {
     Quiz updateQuiz(Long id, QuizDto quizDto);
     List<Quiz> getQuizzes();
     Quiz getQuiz(Long quizId);
+    Quiz updateQuizStatus(Long quizId, boolean active);
     void deleteQuiz(Long quizId);
     List<Quiz> getQuizzesOfCategory(Long categoryId);
     List<Quiz> getActiveQuizzes();

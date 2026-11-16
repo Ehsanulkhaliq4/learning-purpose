@@ -3,6 +3,7 @@ package com.learningpurpose.examservice.controller;
 import com.learningpurpose.examservice.dto.ExamResultDto;
 import com.learningpurpose.examservice.dto.ExamSubmissionDto;
 import com.learningpurpose.examservice.dto.QuizDto;
+import com.learningpurpose.examservice.dto.QuizStatusRequest;
 import com.learningpurpose.examservice.model.Quiz;
 import com.learningpurpose.examservice.service.QuizService;
 import jakarta.validation.Valid;
@@ -28,6 +29,18 @@ public class QuizController {
     @PutMapping("/{id}")
     public ResponseEntity<Quiz> updateQuiz(@PathVariable Long id, @Valid @RequestBody QuizDto quizDto) {
         return ResponseEntity.ok(quizService.updateQuiz(id, quizDto));
+    }
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<Quiz> updateQuizStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody QuizStatusRequest request,
+            @RequestHeader(value = "X-Authenticated-Role", required = false) String authenticatedRole
+    ) {
+        if (!"ROLE_ADMIN".equals(authenticatedRole)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(quizService.updateQuizStatus(id, request.active()));
     }
 
     @GetMapping

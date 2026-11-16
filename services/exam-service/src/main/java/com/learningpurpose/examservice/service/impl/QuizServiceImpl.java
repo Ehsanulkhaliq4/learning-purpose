@@ -81,6 +81,13 @@ public class QuizServiceImpl implements QuizService {
     }
 
     @Override
+    public Quiz updateQuizStatus(Long quizId, boolean active) {
+        Quiz quiz = getQuiz(quizId);
+        quiz.setActive(active);
+        return quizRepository.save(quiz);
+    }
+
+    @Override
     public void deleteQuiz(Long quizId) {
         Quiz quiz = getQuiz(quizId);
         quizRepository.delete(quiz);

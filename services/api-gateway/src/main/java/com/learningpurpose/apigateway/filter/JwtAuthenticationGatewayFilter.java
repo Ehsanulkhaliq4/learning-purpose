@@ -58,11 +58,24 @@ public class JwtAuthenticationGatewayFilter implements GatewayFilter {
 
             Claims claims = jwtUtil.extractAllClaims(token);
             String username = claims.getSubject();
-            Object role = claims.get("role");
+            Object roles = claims.get("roles");
+            String authenticatedRole = claims.get("role", String.class);
+            if (authenticatedRole == null && roles instanceof List<?> roleList) {
+                authenticatedRole = roleList.stream()
+                        .filter(String.class::isInstance)
+                        .map(String.class::cast)
+                        .filter("ROLE_ADMIN"::equals)
+                        .findFirst()
+                        .orElseGet(() -> roleList.stream()
+                                .filter(String.class::isInstance)
+                                .map(String.class::cast)
+                                .findFirst()
+                                .orElse("ROLE_USER"));
+            }
 
             ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                     .header("X-Authenticated-User", username)
-                    .header("X-Authenticated-Role", role != null ? role.toString() : "ROLE_USER")
+                    .header("X-Authenticated-Role", authenticatedRole != null ? authenticatedRole : "ROLE_USER")
                     .build();
 
             return chain.filter(exchange.mutate().request(mutatedRequest).build());

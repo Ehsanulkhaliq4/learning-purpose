@@ -9,6 +9,7 @@ import com.learningpurpose.userservice.dto.RegisterRequest;
 import com.learningpurpose.userservice.event.OtpRequestedEvent;
 import com.learningpurpose.userservice.event.UserRegisteredEvent;
 import com.learningpurpose.userservice.exception.InvalidOtpException;
+import com.learningpurpose.userservice.exception.AccountDeactivatedException;
 import com.learningpurpose.userservice.exception.UserAlreadyExistsException;
 import com.learningpurpose.userservice.model.Role;
 import com.learningpurpose.userservice.model.SaveOtp;
@@ -101,9 +102,25 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(AuthRequest request) {
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword()));
-        User user = userRepository.findByUsername(request.getUsername())
+        User account = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        if (!account.isEnabled()) {
+            Instant reactivatesAt = account.getDeactivatedUntil();
+            if (reactivatesAt != null && !reactivatesAt.isAfter(Instant.now())) {
+                account.setEnabled(true);
+                account.setDeactivatedUntil(null);
+                userRepository.save(account);
+            } else {
+                String message = reactivatesAt == null
+                        ? "Your account has been permanently deactivated. Please contact an administrator for assistance."
+                        : "Your account is deactivated until " + reactivatesAt
+                                + ". Please contact an administrator if you need help.";
+                throw new AccountDeactivatedException(message);
+            }
+        }
+
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword()));
+        User user = account;
         String jwtToken = jwtService.generateToken(user);
 
         return AuthResponse.builder()
