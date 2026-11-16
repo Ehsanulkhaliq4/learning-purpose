@@ -121,7 +121,7 @@ services:
     ports:
       - "9095:8080"
     environment:
-      DEBEZIUM_CONNECT_URL: http://debezium:8083
+      KAFKA_CONNECT_URIS: http://debezium:8083,http://kafka-connect-cassandra:8083
     depends_on:
       debezium:
         condition: service_healthy
@@ -165,7 +165,7 @@ services:
   # MinIO Bucket Initialization
   # -------------------------------------------------------------
   minio-init:
-    image: pgsty/mc:latest  # ✅ FIXED: Community fork
+    image: pgsty/mc:latest
     container_name: learning-purpose-minio-init
     depends_on:
       minio:
