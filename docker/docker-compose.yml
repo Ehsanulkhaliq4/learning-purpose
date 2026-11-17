@@ -226,6 +226,18 @@ services:
     container_name: learning-purpose-mediasoup-service
     ports:
       - "3000:3000"
+      # WebRTC RTP/RTCP ports. They must be published because the browser
+      # connects to mediasoup directly on the port chosen by the SFU.
+      - "40000-40049:40000-40049/udp"
+      - "40000-40049:40000-40049/tcp"
+    environment:
+      # Keep in sync with the published range above.
+      - MEDIASOUP_MIN_PORT=40000
+      - MEDIASOUP_MAX_PORT=40049
+      # Address advertised in ICE candidates. 127.0.0.1 works when the browser
+      # runs on the same machine; set MEDIASOUP_ANNOUNCED_IP to the host's LAN
+      # IP (e.g. 192.168.1.20) when testing from another device.
+      - MEDIASOUP_ANNOUNCED_IP=${MEDIASOUP_ANNOUNCED_IP:-127.0.0.1}
     networks:
       - learning-purpose-network
     depends_on:
@@ -366,6 +378,7 @@ services:
       - MINIO_ENDPOINT=http://minio:9000
       - MINIO_ACCESS_KEY=minioadmin
       - MINIO_SECRET_KEY=minioadminpassword
+      - MEDIASOUP_URL=http://mediasoup-service:3000
     depends_on:
       kafka:
         condition: service_healthy
